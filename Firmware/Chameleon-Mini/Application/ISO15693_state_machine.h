@@ -21,7 +21,8 @@
     When the response function is tag-specific:
       a dereferenced call is needed and a response function shall be defined in a file like mytag.c.
       In this last case a declaration corresponding to the the function is necessary 
-      As an example, since a response function for a ISO15693_READSINGLE command is defined in a TITagitstandard.c, 
+      As an example, TI TAG-it standard requires a specific response function for the ISO15693_READSINGLE command.
+      That function is defined TITagitstandard. 
       the following declaration is added to this file.
       
       extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
