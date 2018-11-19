@@ -5,7 +5,7 @@
  *  Modified by ceres-c to finish things up    
  *
  * This File defines only those special functions necessary to emulate a TI™ HF-I TI STANDARD.
- * While a previous file with the same name was inclusive of the iso 15693 state machine this was rebuild and parted from 
+ * While a previous file with the same name was inclusive of the iso 15693 state machine this one was rebuilt and parted from 
  * the ISO 15693 state machine to achieve tag independece. A file named ISO15693_state_machine.h contains a new ISO15693 state machine.
  * 
  * Dereferenced functions are used in ISO15693_state_machine.h to support tag independece.
