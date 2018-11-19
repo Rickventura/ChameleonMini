@@ -64,6 +64,7 @@ uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
 
 uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
+
   
 
   uint16_t ResponseByteCount = 0;
@@ -113,7 +114,6 @@ uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *reques
    MemoryReadBlock(FramePtr, MemLocation , request->Bytes_per_Page); 
  }
  return ResponseByteCount;
-
 }
 
 void TITagitstandardGetUid(ConfigurationUidType Uid)
