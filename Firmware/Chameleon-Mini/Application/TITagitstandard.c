@@ -99,7 +99,7 @@ uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *reques
           FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
           /*Tagit standard UID is stored in blocks 8 and 9 which are blocked */
           FrameBuf[1] = ( PageAddress == 8 || PageAddress == 9) ? 0x02 : 0x00; /* block security status: when option flag set */
-	  FramePtr = FrameBuf + 2;
+          FramePtr = FrameBuf + 2;
           ResponseByteCount = 6;
   } 
  
