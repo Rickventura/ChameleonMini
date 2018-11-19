@@ -181,14 +181,14 @@ uint16_t ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct 
         if ( request->isaddressed == OUR_ADDR) {
           FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
           ResponseByteCount = 1;
-          State = STATE_READY;
+          *State = STATE_READY;
         } else ResponseByteCount = 0; // not addressed to us
 
    } else if ( *State == STATE_SELECTED && request->select_flg) {
         // 15693-3 2009_A2_2015.pdf manual 10.3.2 page 13 state picture
         FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
         ResponseByteCount = 1;
-        State = STATE_READY;
+        *State = STATE_READY;
    }
   return ResponseByteCount ;  
 }
