@@ -31,14 +31,18 @@ An example of those specific responses is the READ_SINGLE of a TI TAG-IT STANDAR
 We need the fuction Tagit_readsingle() coded in TITagitstandard.c.
 The commands switch in the state machine, triggers a generic read_single function which must be associated to
 our Tagit_readsingle() in order to achieve the desired response.
-The association with the generic readsingle is accomplished in TITagitstandard.c. by simply writing
-read_single = Tagit_readsingle.
+The association with the generic readsingle is accomplished in TITagitstandard.c. by simply writing something
+like (*read_single) = Tagit_readsingle. Once we've done that, anytime we call (*read_single)(FrameBuf,&request) 
+we trigger Tagit_readsingle. 
+When calling a function we could avoid the pointer formalism (*readsingle)(FrameBuf,&request)  and just write read_single(FrameBuf,&request) 
+as the compiler recognise read_single(FrameBuf,&request) as a function call..
 
-In TITagitstandard.c
+In TITagitstandard.c we shall write:
 
 uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);  // the usual function declaration
 uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle; 
-the assignment above associates the generic function (*readsingle) to Tagit_readsingle.
+
+the last line associates the generic function (*readsingle) to Tagit_readsingle.
 Of course we still must code Tagit_readsingle as we would do anyway.
 
 In ISO15693_state_machine.h
@@ -50,7 +54,7 @@ Finally we shall have the command code added to the switch statment.
 switch (Command){
 
  case ISO15693_CMD_READ_SINGLE:        
-       ResponseByteCount = (*readsingle)(FrameBuf, &request);  derefened call to Tagit_readsingle.       
+       ResponseByteCount = (*readsingle)(FrameBuf, &request);  dereferenced call to Tagit_readsingle.              
        break;         
   
 }      
