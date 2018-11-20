@@ -14,33 +14,46 @@
 /* Dereferenced Tag specific functions: 
  Function IS015693AppProcess is supposed to be a general 15693 state machine including responses to all possible commands.
  
- Adding a command means: 
- 1) defining a response function corresonding to the command;
-    When the response function is a standard 15693 response, valid for any 15639 tag:
-    the response function shall be defined in this file.   
-    When the response function is tag-specific:
-      a dereferenced call is needed and a response function shall be defined in a file like mytag.c.
-      In this last case a declaration corresponding to the the function is necessary 
-      As an example, TI TAG-it standard requires a specific response function for the ISO15693_READSINGLE command.
-      That function is defined TITagitstandard. 
-      the following declaration is added to this file.
-      
-      extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
-      Notice that (*readsingle) is generic and, in TITagitstandard.c must be assigned a value.     
-      In TITagitstandard.c the following lines shall be added:             
-      
-      uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
-      uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle; 
-      
-      in this case Tagit_readsingle is the actual function name the one defined in TITagitsandard.c       
-      
- 2) adding a line in the switch statment corresponding to the ISO15693 command constant along with a call to the response function.
-    
-	      case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = (*readsingle)(FrameBuf, &request);  derefened call to Tagit_readsingle.       
-                  break;         
-		  
  
+Defining a command is about designing the response function to that command.
+Some commands trigger responses which are the same for any TAG. Other commands trigger TAG specific responses.
+We call ISO15693 responses those which are independent of any specific TAG.
+The following commands and their corresponding functions are tag independent (there are certainly more).
+They are already included in this core part of the code, the ISO15693_state_machine.
+
+STAY_QUIET     response function is ISO15693_stay_quiet(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) ;
+SELECT         response function is ISO15693_select(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
+RESET_TO_READY response function is ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
+WRITE_SINGLE   response function is ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+
+Code for other commands, those requiring specific responses (TAG dependent), shall be written in their specific files.
+An example of those specific responses is the READ_SINGLE of a TI TAG-IT STANDARD.
+We need the fuction Tagit_readsingle() coded in TITagitstandard.c.
+The commands switch in the state machine, triggers a generic read_single function which must be associated to
+our Tagit_readsingle() in order to achieve the desired response.
+The association with the generic readsingle is accomplished in TITagitstandard.c. by simply writing
+read_single = Tagit_readsingle.
+
+In TITagitstandard.c
+
+uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);  // the usual function declaration
+uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle; 
+the assignment above associates the generic function (*readsingle) to Tagit_readsingle.
+Of course we still must code Tagit_readsingle as we would do anyway.
+
+In ISO15693_state_machine.h
+we shall add the following line to let the code know that readsingle pointer is defined elsewhere. 
+extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+
+Finally we shall have the command code added to the switch statment.
+
+switch (Command){
+
+ case ISO15693_CMD_READ_SINGLE:        
+       ResponseByteCount = (*readsingle)(FrameBuf, &request);  derefened call to Tagit_readsingle.       
+       break;         
+  
+}      
 */
 //Dereferenced Tag specific functions 
 extern void (*TagGetUid)(ConfigurationUidType Uid) ;
