@@ -13,11 +13,11 @@
 
 /* Dereferenced Tag specific functions: 
  Function uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes). 
- is supposed to be general 15693 state machine including responses to all possible commands.
+ is supposed to be a general 15693 state machine including responses to all possible commands.
  A TAG C file named something like myTAG.c is necessary as well and ISO15693_state_machine.h shall be included into myTAG.c.
  The decision to include an .h file, instead of compiling a .c file and linking the corresponding object file, was made to 
  leave everything else unchanged, the make file as well.
- See TITagitstandard.c for a practical example of myTAG.c. Any new tag shall be defined in its own  c file as it was before 
+ See TITagitstandard.c for a practical example of myTAG.c. Any new tag shall be defined in its own  c file, as it was before 
  the recent splitting of the state_machine from the tag. The function myTAGAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes),
  defined in any tag sorce file like myTAG.c, shall define myTAGAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes) which encapsulates a 
  call to IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes).
@@ -42,22 +42,21 @@
  Code for other commands, those requiring specific responses (TAG dependent), shall be written in their specific files.
  An example of those specific responses is the READ_SINGLE of a TI TAG-IT STANDARD.
  We define the fuction Tagit_readsingle() in TITagitstandard.c.
- The commands switch in the state machine, triggers a generic readsingle() function which, in this case, must be associated to
- our Tagit_readsingle() in order to achieve the desired response.
- The association with the generic readsingle() function is accomplished in TITagitstandard.c. As a function pointer is just 
- a variable, we simply assigning our Tagit_readsingle() to readsingle(). 
+ The call to a generic readsingle() function is triggered by a "commands switch" defined in the state machine, as it was before the split.
+ The association between the tag specific myTag_readsingle() with the generic readsingle() function is accomplished in TITagitstandard.c. 
+ As a function pointer is just a variable, we simply assigning our Tagit_readsingle() to readsingle(). 
   
  uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle
   
  To the benefict of those who aren't familiar with pointers to functions, commonly used in c,
- read_single being the pointer to the function (*read_single). Once that assignment is in place,  the
- call (*read_single)(FrameBuf,&request) becames the same as a direct call to Tagit_readsingle(FrameBuf,&request).
- By doing their own assignments, 
+ a call like (*readsingle)(FrameBuf,&request), readsingle being the pointer to the function (*readsingle), 
+ simply becames a call to Tagit_readsingle(FrameBuf,&request).
+ By so doing any assignment in specific tag files like 
  
  (*read_single) = Tag1_readsingle. 
  (*read_single) = Tag2_readsingle. 
  
- the very same call in the state_machine (*read_single)(FrameBuf,&request) will trigger different responses.
+ will make a call (*read_single)(FrameBuf,&request) trigger its assigned function.
  We have achieved what is called a "dereferenced call".
  
  More technically , in TITagitstandard.c we shall write:
