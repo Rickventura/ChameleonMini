@@ -104,7 +104,72 @@ static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO1569
 static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
 static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
 
-      
+uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
+{   
+     
+   
+    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
+        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {
+         
+            // At this point, we have a valid ISO15693 frame            
+            uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
+            uint8_t mayExecute = 0;
+	    struct ISO15693_parameters request;            
+            
+            
+            ResponseByteCount = 0;
+            request    = ISO15693_extract_par (FrameBuf);	
+            mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
+
+            if (mayExecute){ 
+	      switch ( request.cmd ) {
+
+	        case ISO15693_CMD_STAY_QUIET:         
+                  ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+                  break;
+
+                case ISO15693_CMD_SELECT:             
+                  ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+                  break;
+
+	        case ISO15693_CMD_RESET_TO_READY:     
+                  ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+                  break;
+
+                case ISO15693_CMD_INVENTORY:  
+		  ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+                  break;       
+
+   	       case ISO15693_CMD_WRITE_SINGLE:       
+	          ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+	          break;
+
+	      case ISO15693_CMD_READ_SINGLE:        
+	          ResponseByteCount = (*readsingle)(FrameBuf, &request);         
+                  break;
+              default:
+                ResponseByteCount = 0;
+                break;
+            }// end switch
+
+           } 
+
+           if (ResponseByteCount > 0) {
+                /* There is data to be sent. Append CRC */
+                ISO15693AppendCRC(FrameBuf, ResponseByteCount);
+                ResponseByteCount += ISO15693_CRC16_SIZE;
+            }
+
+            return ResponseByteCount;
+
+        } else { // Invalid CRC
+            return ISO15693_APP_NO_RESPONSE;
+        }
+    } else { // Min frame size not met
+        return ISO15693_APP_NO_RESPONSE;
+    }
+
+}      
 
 
 struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
@@ -334,71 +399,6 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
  return mayExecute; // returns whether a command may be executed
 
 }
-uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
-{   
-     
-   
-    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
-        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {
-         
-            // At this point, we have a valid ISO15693 frame            
-            uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
-            uint8_t mayExecute = 0;
-	    struct ISO15693_parameters request;            
-            
-            
-            ResponseByteCount = 0;
-            request    = ISO15693_extract_par (FrameBuf);	
-            mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
 
-            if (mayExecute){ 
-	      switch ( request.cmd ) {
-
-	        case ISO15693_CMD_STAY_QUIET:         
-                  ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-                  break;
-
-                case ISO15693_CMD_SELECT:             
-                  ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-                  break;
-
-	        case ISO15693_CMD_RESET_TO_READY:     
-                  ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-                  break;
-
-                case ISO15693_CMD_INVENTORY:  
-		  ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-                  break;       
-
-   	       case ISO15693_CMD_WRITE_SINGLE:       
-	          ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-	          break;
-
-	      case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = (*readsingle)(FrameBuf, &request);         
-                  break;
-              default:
-                ResponseByteCount = 0;
-                break;
-            }// end switch
-
-           } 
-
-           if (ResponseByteCount > 0) {
-                /* There is data to be sent. Append CRC */
-                ISO15693AppendCRC(FrameBuf, ResponseByteCount);
-                ResponseByteCount += ISO15693_CRC16_SIZE;
-            }
-
-            return ResponseByteCount;
-
-        } else { // Invalid CRC
-            return ISO15693_APP_NO_RESPONSE;
-        }
-    } else { // Min frame size not met
-        return ISO15693_APP_NO_RESPONSE;
-    }
-
-}
 
 
