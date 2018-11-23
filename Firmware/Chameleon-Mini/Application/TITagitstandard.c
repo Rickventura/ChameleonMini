@@ -5,7 +5,7 @@
  *  Modified by ceres-c to finish things up    
  *
  * This File defines only those special functions necessary to emulate a TI™ HF-I TI STANDARD.
- * While a previous file with the same name was inclusive of the iso 15693 state machine this one was rebuilt and parted from 
+ * While a previous file with the same name was inclusive of the iso 15693 state machine this was rebuild and parted from 
  * the ISO 15693 state machine to achieve tag independece. A file named ISO15693_state_machine.h contains a new ISO15693 state machine.
  * 
  * Dereferenced functions are used in ISO15693_state_machine.h to support tag independece.
@@ -17,15 +17,17 @@
 #include "../Memory.h"
 #include "Crypto1.h"
 #include "../Random.h"
-#include "ISO15693-A.h"
+//#include "ISO15693-A.h"
+//#include "ISO15693_sm_definitions.h"
 #include "TITagitstandard.h"
-
-/* Any tag shall include the general ISO15693 state machine */
 #include "ISO15693_sm_definitions.h"
+/* Any tag shall include the general ISO15693 state machine */
+
 #include "ISO15693_state_machine.h"
 
+
 /* Tag's specific functions necessary to the ISO15693 state machine shall be declared
-and assigned to a dereferenced pointer to functions used by the state machine*/
+and assigned to a dereferenced pointer to function used by the state machine*/
 void TITagitstandardGetUid(ConfigurationUidType Uid);
 void (*TagGetUid)(ConfigurationUidType Uid) = TITagitstandardGetUid; // dereferenced pointer TagGetUid used in ISO15693_state_machine.h
 
@@ -59,12 +61,12 @@ void TITagitstandardAppTick(void)
 }
 
 uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
-      IS015693AppProcess(FrameBuf,FrameBytes);
+    return(IS015693AppProcess(FrameBuf,FrameBytes));
+
 }
 
 uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
-
   
 
   uint16_t ResponseByteCount = 0;
@@ -99,7 +101,7 @@ uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *reques
           FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
           /*Tagit standard UID is stored in blocks 8 and 9 which are blocked */
           FrameBuf[1] = ( PageAddress == 8 || PageAddress == 9) ? 0x02 : 0x00; /* block security status: when option flag set */
-          FramePtr = FrameBuf + 2;
+	  FramePtr = FrameBuf + 2;
           ResponseByteCount = 6;
   } 
  
@@ -114,6 +116,7 @@ uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *reques
    MemoryReadBlock(FramePtr, MemLocation , request->Bytes_per_Page); 
  }
  return ResponseByteCount;
+
 }
 
 void TITagitstandardGetUid(ConfigurationUidType Uid)

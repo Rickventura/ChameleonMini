@@ -5,106 +5,68 @@
  *        
  *      
  *  A more general 15693 state machine. 
- *  Dereferenced functions (pointer to functions) are used to support tags specific functions.
+ *  Dereferenced functions (pointer to functions) are used in case tags use different function for the same purpouse.
  *  Reuse of this code is supposed to speedup and generalize code making for different 15693 tags.
  *      
  */
 
 
 /* Dereferenced Tag specific functions: 
- Function uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes). 
- is supposed to be a general 15693 state machine including responses to all possible commands.
- A TAG C file named something like myTAG.c is necessary as well and ISO15693_state_machine.h shall be included into myTAG.c.
- The decision to include an .h file, instead of compiling a .c file and linking the corresponding object file, was made to 
- leave everything else unchanged, the make file as well.
- See TITagitstandard.c for a practical example of myTAG.c. Any new tag shall be defined in its own  c file, as it was before 
- the recent splitting of the state_machine from the tag. The function myTAGAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes),
- defined in any tag sorce file like myTAG.c, shall define myTAGAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes) which encapsulates a 
- call to IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes).
- In myTAG.c it should look like
-  
- uint16_t myTAGAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes) 
- { 
-   IS015693AppProcess( FrameBuf,  FrameBytes);
- }
+ Function IS015693AppProcess is supposed to be a general 15693 state machine including responses to all possible commands.
  
- In the state machine file, defining a command, is about designing and defining a response function for that command.
- Some commands trigger responses which are the same for any TAG. Other commands trigger TAG specific responses.
- We call ISO15693 responses those which are independent of any specific TAG.
- The following commands and their corresponding functions are tag independent (there are certainly more).
- They are already included in this core part of the code, the ISO15693_state_machine.
-
- STAY_QUIET     response function is ISO15693_stay_quiet(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) ;
- SELECT         response function is ISO15693_select(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
- RESET_TO_READY response function is ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
- WRITE_SINGLE   response function is ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
-
- Code for other commands, those requiring specific responses (TAG dependent), shall be written in their specific files.
- An example of those specific responses is the READ_SINGLE of a TI TAG-IT STANDARD.
- We define the fuction Tagit_readsingle() in TITagitstandard.c.
- The call to a generic readsingle() function is triggered by a "commands switch" defined in the state machine, as it was before the split.
- The association between the tag specific myTag_readsingle() with the generic readsingle() function is accomplished in TITagitstandard.c. 
- As a function pointer is just a variable, we simply assigning our Tagit_readsingle() to readsingle(). 
-  
- uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle
-  
- To the benefict of those who aren't familiar with pointers to functions, commonly used in c,
- a call like (*readsingle)(FrameBuf,&request), readsingle being the pointer to the function (*readsingle), 
- simply becames a call to Tagit_readsingle(FrameBuf,&request).
- By so doing any assignment in specific tag files like 
+ Adding a command means: 
+ 1) defining a response function corresonding to the command;
+    When the response function is a standard 15693 response, valid for any 15639 tag:
+    the response function shall be defined in this file.   
+    When the response function is tag-specific:
+      a dereferenced call is needed and a response function shall be defined in a file like mytag.c.
+      In this last case a declaration corresponding to the the function is necessary 
+      As an example, since a response function for a ISO15693_READSINGLE command is defined in a TITagitstandard.c, 
+      the following declaration is added to this file.
+      
+      extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+      Notice that (*readsingle) is generic and, in TITagitstandard.c must be assigned a value.     
+      In TITagitstandard.c the following lines shall be added:             
+      
+      uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
+      uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle; 
+      
+      in this case Tagit_readsingle is the actual function name the one defined in TITagitsandard.c       
+      
+ 2) adding a line in the switch statment corresponding to the ISO15693 command constant along with a call to the response function.
+    
+	      case ISO15693_CMD_READ_SINGLE:        
+	          ResponseByteCount = (*readsingle)(FrameBuf, &request);  derefened call to Tagit_readsingle.       
+                  break;         
+		  
  
- (*read_single) = Tag1_readsingle. 
- (*read_single) = Tag2_readsingle. 
- 
- will make a call (*read_single)(FrameBuf,&request) trigger its assigned function.
- We have achieved what is called a "dereferenced call".
- 
- More technically , in TITagitstandard.c we shall write:
-
- uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);  // the usual function declaration
- uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle; 
-
- Of course we still must code Tagit_readsingle as we would do anyway.
-
- In ISO15693_state_machine.h
- we shall add the following line to let the code know that readsingle pointer is defined elsewhere. 
-
- extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
-
- Finally we shall have the command code added to the switch statment.
-
- switch (Command){
-
-   case ISO15693_CMD_READ_SINGLE:        
-       ResponseByteCount = (*readsingle)(FrameBuf, &request);  dereferenced call to Tagit_readsingle.              
-       break;         
-  
- }      
 */
 //Dereferenced Tag specific functions 
 extern void (*TagGetUid)(ConfigurationUidType Uid) ;
 extern void (*TagSetUid)(ConfigurationUidType Uid) ;
 extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
-// shared machine state functions
+// ISO15693 state machine functions
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
-static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters *request , uint16_t *ResponseByteCount )	;
+static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters *request , uint16_t *ResponseByteCount );
 static uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
-	
-// shared ISO15693 commands functions
-static uint16_t  ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request );
+
+
+// ISO15693 command functions
+static uint16_t ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request );
 static uint16_t ISO15693_stay_quiet(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) ;
 static uint16_t ISO15693_select(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static uint16_t ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static uint16_t ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 // pointers to functions included in the standard ISO15693 machine
-static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
-static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
-static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
-static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
-
+//static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
+//static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
+//static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
+//static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
+            
 uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
+
 {   
      
    
@@ -169,8 +131,7 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
         return ISO15693_APP_NO_RESPONSE;
     }
 
-}      
-
+}
 
 struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
 {
@@ -209,7 +170,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
     request.select_flg   = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SELECT    ? 1 : 0;    
   }
 
-  (*TagGetUid)(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it might be
+  (*TagGetUid)(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it maight be
 
   if (request.address_flg){ // addressed request       
     
@@ -399,6 +360,5 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
  return mayExecute; // returns whether a command may be executed
 
 }
-
 
 
