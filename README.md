@@ -33,7 +33,7 @@ STEP 2: functions to be associated with some function call into the state machin
     uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
     uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle;  
 
-STEP 3: Define the tag Appprocess function that returns the function IS015693AppProcess aas follows
+STEP 3: Define the tag Appprocess function that returns the function IS015693AppProcess as follows
 =================================================
     uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
         return(IS015693AppProcess(FrameBuf,FrameBytes))
