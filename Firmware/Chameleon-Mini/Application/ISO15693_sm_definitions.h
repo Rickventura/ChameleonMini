@@ -11,7 +11,7 @@ static enum request_addressed{
 };
 
 
-struct ISO15693_parameters {
+static struct ISO15693_parameters {
 
  uint8_t Flags;
  uint8_t cmd;
