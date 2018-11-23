@@ -4,7 +4,7 @@ static enum status{
     STATE_QUIET
 } State;
 
-enum request_addressed{
+static enum request_addressed{
     OUR_ADDR = 1 ,
     NOT_ADDRESSED  = 0 ,
     TO_OTHERS = -1
