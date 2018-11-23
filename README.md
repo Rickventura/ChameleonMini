@@ -1,6 +1,6 @@
 Chameleon-Mini rev G ISO15693 STATE MACHINE
 ===========================================
-This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications. The Application directory consists of source files written in C language, the files ISO15693_state_machine.h and ISO15963_sm_definitions.h are assumed to be included as header into a tag specific file in order to be exploited.
+This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications.
 
 A WORKING EXAMPLE:
 TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR
