@@ -1,31 +1,41 @@
-Chameleon-Mini test
-==============
-This is the official repository of ChameleonMini, a freely programmable, portable tool for NFC security analysis that can emulate and clone contactless cards, read RFID tags and sniff/log RF data. Thanks to over 1700 backers from our [Kickstarter project](https://www.kickstarter.com/projects/1980078555/chameleonmini-a-versatile-nfc-card-emulator-and-mo), the current Revision G has been realized by Kasper & Oswald GmbH.
+Chameleon-Mini rev G ISO15693 STATE MACHINE
+===========================================
+This is a repository forked from ChameleonMini rev G, and attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications. The Application directory consists of source files written in C language, the files ISO15693_state_machine.h and ISO15963_sm_definitions.h are assumed to be included as header into a tag specific file in order to be exploited.
 
-The ChameleonMini RevG is now also available via the Kasper & Oswald [Webshop](https://shop.kasper.it/). Thank you for supporting the project!
+A WORKING EXAMPLE: TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR
+===============================================================
+The file TITagitstandard.c in this application directory is a working example of how a source file should be written in order to exploit the core ISO15693 state machine. 
 
-IMPORTANT: Third-party Clones
-------------------
-We are aware of various third-party ChameleonMini clones or modified variants that are available on the Internet. Warning: We have evidence that some of these devices are defective or suffer from reading problems et cetera. Please understand that we cannot give support for these non-official devices, as we have no schematics / layout or other information, nor do we know the manufacturers. In case of problems, please contact the manufacturers of your device directly. 
+STEP 1: include the necessary files as shown below:
 
-Note to the manufacturers: Some of the third-party ChameleonMini are violating the ChameleonMini license, please obey the license (see LICENSE.txt)!
+include "../Codec/ISO15693.h"
+#include "../Memory.h"
+#include "Crypto1.h"
+#include "../Random.h"
+#include "TITagitstandard.h"
+/* Any tag shall include the general ISO15693 state machine */
+#include "ISO15693_sm_definitions.h"
+#include "ISO15693_state_machine.h"
 
-First Steps
------------
-To upgrade the firmware of your ChameleonMini, please visit the [Getting Started page](https://rawgit.com/emsec/ChameleonMini/master/Doc/Doxygen/html/_page__getting_started.html) from the [doxygen documentation](http://rawgit.com/emsec/ChameleonMini/master/Doc/Doxygen/html/index.html).
+STEP 2: declare the functions that must be associated with some function call into the state machine
 
-Supported Cards and Codecs
---------------------------
-See [here](https://github.com/emsec/ChameleonMini/wiki/Supported-Cards-and--Codecs).
+void TITagitstandardGetUid(ConfigurationUidType Uid); //this function gets the correct UID from a Tag-it standard tag
+//Assuming (*TagGetUid) is the function call in the state machine 
+void (*TagGetUid)(ConfigurationUidType Uid) = TITagitstandardGetUid; // dereferenced pointer TagGetUid used in       
 
+ISO15693_state_machine.h void TITagitstandardSetUid(ConfigurationUidType Uid);
+//Assuming (*TagSetUid) is the function call in the state machine 
+void (*TagSetUid)(ConfigurationUidType Uid) = TITagitstandardSetUid; // association of TagSetUid with TITagitstandardSetUid 
 
-Questions
----------
-If you have any questions, please visit the [Issues page](https://github.com/emsec/ChameleonMini/issues) and ask your questions there so everyone benefits from the answer.
+// Assuming (*readsingle) is the function call in the state machine
+uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
+uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle;  
 
-External Contributions
-----------------------
-We appreciate every contribution to the project. Have a look at the [External Contributions page](https://github.com/emsec/ChameleonMini/wiki/External-Contributions).
+STEP 3:
+//Assuming TITagitstandardAppProcess is the tag application process function, write the call to the state machine application process as follow, where return(IS015693AppProcess(FrameBuf,FrameBytes)); will be the same for all tags.
+uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
+    return(IS015693AppProcess(FrameBuf,FrameBytes));
+}
 
 Repository Structure
 --------------------
