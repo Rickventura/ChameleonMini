@@ -92,7 +92,7 @@ static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_para
 static uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
 	
 // shared ISO15693 commands functions
-static uint16_t  ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request )
+static uint16_t  ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request );
 static uint16_t ISO15693_stay_quiet(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) ;
 static uint16_t ISO15693_select(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static uint16_t ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
