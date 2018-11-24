@@ -21,25 +21,38 @@ STEP 1: include the necessary files as shown below:
     #include "ISO15693_state_machine.h"
 
 
-STEP 2: functions to be associated with some function call into the state machine must be declared
+STEP 2: functions to be dereferenced by functions call into the state machine must be declared
 ===============================================================
     Assuming TITagitstandardGetUid is tag specific and (*TagGetUid) is the function call in the state machine
-    void TITagitstandardGetUid(ConfigurationUidType Uid);
-    void (*TagGetUid)(ConfigurationUidType Uid) = TITagitstandardGetUid; 
+
+    void TITagitstandardGetUid(ConfigurationUidType Uid); this is usual function declaration
+    extern void (*TagGetUid)(ConfigurationUidType Uid);   this is the dereferenced function declared in the state machine
         
     void TITagitstandardSetUid(ConfigurationUidType Uid);    
-    void (*TagSetUid)(ConfigurationUidType Uid) = TITagitstandardSetUid; 
+    extern void (*TagSetUid)(ConfigurationUidType Uid); 
     
-    uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
-    uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request) = Tagit_readsingle;  
+    uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
+    extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);  
 
-STEP 3: Define the tag Approcess that returns the function IS015693AppProcess as follows
+STEP 3: Initialize the dereferenced functions 
+=================================================
+    One way to initialize the dereferenced fuctions is to assign them int the init function
+    void TITagitstandardAppInit(void)
+    {
+        State = STATE_READY;
+        TagGetUid = TITagitstandardGetUid;
+        TagGetUid = TITagitstandardGetUid;	
+        readsingle = TITagitstandard_readsingle;	
+    }
+
+
+STEP 4: Define the tag Approcess that returns the function IS015693AppProcess as follows
 =================================================
     uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
         return(IS015693AppProcess(FrameBuf,FrameBytes))
     }
     
-STEP 4:Define all the functions declared in STEP2
+STEP 5:Define all the functions declared in STEP2
 =================================================
     void TITagitstandardGetUid(ConfigurationUidType Uid)
     {
@@ -55,12 +68,12 @@ STEP 4:Define all the functions declared in STEP2
     {
     }
     
- STEP 5: Back to ISO15693_state_machine.h 
-    extern declaration
+ STEP 5: Back to ISO15693_state_machine.h declare the dereferenced functions    
  =================================================
-    extern void (*TagGetUid)(ConfigurationUidType Uid) ;
-    extern void (*TagSetUid)(ConfigurationUidType Uid) ;
-    extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
+    Functions which calls are in the state machine must be decleared in order to be used by TITagitstandard.c
+    void (*TagGetUid)(ConfigurationUidType Uid) ;
+    void (*TagSetUid)(ConfigurationUidType Uid) ;
+    uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
  
  
  
