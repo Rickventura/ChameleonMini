@@ -21,7 +21,7 @@ STEP 1: include the necessary files as shown below:
     #include "ISO15693_state_machine.h"
 
 
-STEP 2: functions called in the state machine must be declared as extern to the tag specific file
+STEP 2: functions called in the state machine(dereferenced functions) must be declared as extern to the tag specific file
 ===============================================================
     Assuming TITagitstandardGetUid is tag specific and (*TagGetUid)() is the function called in the state machine
 
@@ -68,7 +68,7 @@ STEP 5:Define all the functions declared in STEP2
     {
     }
     
- STEP 5: Back to ISO15693_state_machine.h declare the dereferenced functions    
+ STEP 5: In ISO15693_state_machine.h declare the dereferenced functions    
  =================================================
     Functions which calls are in the state machine must be decleared in order to be used by TITagitstandard.c
     void (*TagGetUid)(ConfigurationUidType Uid) ;
