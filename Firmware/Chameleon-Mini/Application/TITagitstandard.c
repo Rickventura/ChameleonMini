@@ -110,20 +110,28 @@ uint16_t Tag_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 
 }
 
-void TagGetUid(ConfigurationUidType Uid)
-{
-    MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
-
+void TITagitstandardGetUid(ConfigurationUidType Uid)
+{	
+    MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize)
     // Reverse UID after reading it
     TITagitstandardFlipUid(Uid);
+}	
+
+void TITagitstandardSetUid(ConfigurationUidType Uid)
+{
+    TITagitstandardFlipUid(Uid);    
+    MemoryWriteBlock(Uid, TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
+	
+}
+void TagGetUid(ConfigurationUidType Uid)
+{
+    TITagitstandardGetUid(Uid);	
 }
 
 void TagSetUid(ConfigurationUidType Uid)
 {
     // Reverse UID before writing it
-    TITagitstandardFlipUid(Uid);
-    
-    MemoryWriteBlock(Uid, TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
+	TITagitstandardSetUid(Uid);
 }
 
 void TITagitstandardFlipUid(ConfigurationUidType Uid)
