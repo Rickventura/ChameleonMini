@@ -42,9 +42,16 @@
  
 */
 //Dereferenced Tag specific functions 
-extern void (*TagGetUid)(ConfigurationUidType Uid) ;
-extern void (*TagSetUid)(ConfigurationUidType Uid) ;
-extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+void (*TagGetUid)(ConfigurationUidType Uid) ;
+void (*TagSetUid)(ConfigurationUidType Uid) ;
+uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+
+// pointers to functions included in the standard ISO15693 machine: actually not used
+//static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
+//static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
+//static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
+//static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
+
 
 // ISO15693 state machine functions
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
@@ -59,11 +66,6 @@ static uint16_t ISO15693_select(enum status *State , uint8_t *FrameBuf, struct I
 static uint16_t ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static uint16_t ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
-// pointers to functions included in the standard ISO15693 machine
-//static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
-//static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
-//static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
-//static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
             
 uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
