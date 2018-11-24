@@ -34,7 +34,7 @@ extern void (*TagGetUid)(ConfigurationUidType Uid); // dereferenced pointer TagG
 void TITagitstandardSetUid(ConfigurationUidType Uid);
 extern void (*TagSetUid)(ConfigurationUidType Uid); // dereferenced pointer TagSetUid used in ISO15693_state_machine.h
 
-uint16_t Tagit_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
+uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
 extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request); // dereferenced pointer readsingle  used in ISO15693_state_machine.h     
 
 
@@ -44,7 +44,7 @@ void TITagitstandardAppInit(void)
     State = STATE_READY;
     TagGetUid = TITagitstandardGetUid;
     TagGetUid = TITagitstandardGetUid;	
-    readsingle = Tagit_readsingle;
+    readsingle = TITagitstandard_readsingle;
 	
 }
 
@@ -69,7 +69,7 @@ uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
 
 }
 
-uint16_t Tagit_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
+uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
   
 
