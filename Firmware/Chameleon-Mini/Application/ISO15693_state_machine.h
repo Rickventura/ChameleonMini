@@ -4,28 +4,20 @@
  *  Created by rickventura on: Nov-16-2018 
  *        
  *      
- *  A more general 15693 state machine. 
- *  Dereferenced functions (pointer to functions) are used in case tags use different function for the same purpouse.
- *  Reuse of this code is supposed to speedup and generalize code making for different 15693 tags.
+ *  For those who dislike pointers to functions, this is a second way to split a general 15693 state machine from tags.
+ *  Static declarations of Tag dependent functions allow to share function names accross different tags.
+ *  Same as dereferencing withouth the use of pointers to funcions.
  *      
  */
 
 
-/* Dereferenced Tag specific functions: 
- Function IS015693AppProcess is supposed to be a general 15693 state machine including responses to all possible commands.
- 	  
- 
+/* 
+ All functions names shared by different tags should be declared here as static 
+ The actual functions are to be defined in the respective tag source file. 
 */
-//Dereferenced Tag specific functions 
-void (*TagGetUid)(ConfigurationUidType Uid) ;
-void (*TagSetUid)(ConfigurationUidType Uid) ;
-uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
-
-// example of dereferenced pointers to functions that could be used: actually not used
-//static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
-//static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
-//static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
-//static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
+static void TagGetUid(ConfigurationUidType Uid) ;
+static void TagSetUid(ConfigurationUidType Uid) ;
+static uint16_t readsingle (uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 
 // ISO15693 state machine functions
@@ -84,7 +76,7 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 	          break;
 
 	      case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = (*readsingle)(FrameBuf, &request);         
+	          ResponseByteCount = readsingle(FrameBuf, &request);         
                   break;
               default:
                 ResponseByteCount = 0;
@@ -147,7 +139,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
     request.select_flg   = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SELECT    ? 1 : 0;    
   }
 
-  (*TagGetUid)(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it maight be
+  TagGetUid(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it maight be
 
   if (request.address_flg){ // addressed request       
     
