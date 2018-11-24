@@ -46,7 +46,7 @@ void (*TagGetUid)(ConfigurationUidType Uid) ;
 void (*TagSetUid)(ConfigurationUidType Uid) ;
 uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
-// pointers to functions included in the standard ISO15693 machine: actually not used
+// example of dereferenced pointers to functions that could be used: actually not used
 //static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
 //static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
 //static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
