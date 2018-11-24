@@ -111,7 +111,7 @@ uint16_t Tag_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 
 void TITagitstandardGetUid(ConfigurationUidType Uid)
 {	
-    MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize)
+    MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
     // Reverse UID after reading it
     TITagitstandardFlipUid(Uid);
 }	
