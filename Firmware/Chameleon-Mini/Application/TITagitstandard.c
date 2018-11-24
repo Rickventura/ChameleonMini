@@ -28,23 +28,11 @@
 
 /* Tag's specific functions necessary to the ISO15693 state machine shall be declared
 and assigned to a dereferenced pointer to function used by the state machine*/
-void TITagitstandardGetUid(ConfigurationUidType Uid);
-extern void (*TagGetUid)(ConfigurationUidType Uid); // dereferenced pointer TagGetUid used in ISO15693_state_machine.h
-
-void TITagitstandardSetUid(ConfigurationUidType Uid);
-extern void (*TagSetUid)(ConfigurationUidType Uid); // dereferenced pointer TagSetUid used in ISO15693_state_machine.h
-
-uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
-extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request); // dereferenced pointer readsingle  used in ISO15693_state_machine.h     
-
 
 
 void TITagitstandardAppInit(void)
 {
     State = STATE_READY;
-    TagGetUid = TITagitstandardGetUid;
-    TagGetUid = TITagitstandardGetUid;	
-    readsingle = TITagitstandard_readsingle;
 	
 }
 
@@ -69,10 +57,9 @@ uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
 
 }
 
-uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
+uint16_t Tag_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
   
-
   uint16_t ResponseByteCount = 0;
   uint16_t PageAddress , MemLocation; 
   uint8_t *FramePtr;
@@ -123,7 +110,7 @@ uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_paramete
 
 }
 
-void TITagitstandardGetUid(ConfigurationUidType Uid)
+void TagGetUid(ConfigurationUidType Uid)
 {
     MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
 
@@ -131,7 +118,7 @@ void TITagitstandardGetUid(ConfigurationUidType Uid)
     TITagitstandardFlipUid(Uid);
 }
 
-void TITagitstandardSetUid(ConfigurationUidType Uid)
+void TagSetUid(ConfigurationUidType Uid)
 {
     // Reverse UID before writing it
     TITagitstandardFlipUid(Uid);
