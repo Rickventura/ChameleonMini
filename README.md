@@ -66,6 +66,7 @@ STEP 5: Define TagGetUid and TagSetUid ( amndatory shared functions) to encapsul
     }
 
 STEP 6: Define the custom functions
+=================================================
 
     uint16_t Tag_readsingle( uint8_t *FrameBuf, struct ISO15693_parameters *request)
     {
