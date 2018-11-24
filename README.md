@@ -68,13 +68,17 @@ STEP 5:Define all the functions declared in STEP2
     {
     }
     
- STEP 5: In ISO15693_state_machine.h declare the dereferenced functions    
+ STEP 6: In ISO15693_state_machine.h declare the dereferenced functions    
  =================================================
     Functions which calls are in the state machine must be decleared in order to be used by TITagitstandard.c
     void (*TagGetUid)(ConfigurationUidType Uid) ;
     void (*TagSetUid)(ConfigurationUidType Uid) ;
     uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
  
+ STEP 7: In ISO15693_state_machine.h add the custom command to the command switch:
+ =================================================
  
- 
+    case ISO15693_CMD_READ_SINGLE:        
+	          ResponseByteCount = Tag_readsingle(FrameBuf, &request);         
+    break;
  
