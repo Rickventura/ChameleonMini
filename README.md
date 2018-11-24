@@ -21,7 +21,7 @@ STEP 1: include the necessary files as shown below:
     #include "ISO15693_state_machine.h"
 
 
-STEP 2: functions to be dereferenced by functions call into the state machine must be declared
+STEP 2: extern functions to be dereferenced by functions call into the state machine must be declared
 ===============================================================
     Assuming TITagitstandardGetUid is tag specific and (*TagGetUid) is the function call in the state machine
 
