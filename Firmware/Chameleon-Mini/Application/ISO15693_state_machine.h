@@ -17,7 +17,7 @@
 */
 static void TagGetUid(ConfigurationUidType Uid) ;
 static void TagSetUid(ConfigurationUidType Uid) ;
-static uint16_t readsingle (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+static uint16_t Tag_readsingle (uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 
 // ISO15693 state machine functions
