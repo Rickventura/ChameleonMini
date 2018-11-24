@@ -13,7 +13,7 @@
 
 /* 
  All functions names shared by different tags should be declared here as static 
- The actual functions are to be defined in the respective tag source file. 
+ The actual functions are to be defined in their respective tag source file. 
 */
 static void TagGetUid(ConfigurationUidType Uid) ;
 static void TagSetUid(ConfigurationUidType Uid) ;
