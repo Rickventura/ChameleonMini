@@ -26,9 +26,8 @@
 #include "ISO15693_state_machine.h"
 
 
-/* Tag's specific functions necessary to the ISO15693 state machine shall be declared
-and assigned to a dereferenced pointer to function used by the state machine*/
-
+void TITagitstandardGetUid(ConfigurationUidType Uid);
+void TITagitstandardSetUid(ConfigurationUidType Uid);
 
 void TITagitstandardAppInit(void)
 {
