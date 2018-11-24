@@ -21,9 +21,9 @@ STEP 1: include the necessary files as shown below:
     #include "ISO15693_state_machine.h"
 
 
-STEP 2: extern functions to be dereferenced by functions call into the state machine must be declared
+STEP 2: functions called in the state machine must be declared as extern to the tag specific file
 ===============================================================
-    Assuming TITagitstandardGetUid is tag specific and (*TagGetUid) is the function call in the state machine
+    Assuming TITagitstandardGetUid is tag specific and (*TagGetUid)() is the function called in the state machine
 
     void TITagitstandardGetUid(ConfigurationUidType Uid); this is usual function declaration
     extern void (*TagGetUid)(ConfigurationUidType Uid);   this is the dereferenced function declared in the state machine
