@@ -44,7 +44,7 @@ void TITagitstandardAppInit(void)
     State = STATE_READY;
     TagGetUid = TITagitstandardGetUid;
     TagGetUid = TITagitstandardGetUid;	
-    readSingle = Tagit_readsingle;
+    readsingle = Tagit_readsingle;
 	
 }
 
