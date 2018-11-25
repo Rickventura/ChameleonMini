@@ -40,7 +40,7 @@ STEP 4: Define the custom tag Approcess to return the function IS015693AppProces
         return(IS015693AppProcess(FrameBuf,FrameBytes))
     }
     
-STEP 5: Define TagGetUid and TagSetUid ( amndatory shared functions) to encapsulate the TITagitstandardSetUid,TITagitstandardGetUid
+STEP 5: Define the mandatory shared functions to encapsulate the TITagitstandardSetUid,TITagitstandardGetUid
 =================================================
     void TITagitstandardGetUid(ConfigurationUidType Uid)
     {	
