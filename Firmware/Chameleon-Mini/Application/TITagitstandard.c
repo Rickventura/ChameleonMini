@@ -17,12 +17,10 @@
 #include "../Memory.h"
 #include "Crypto1.h"
 #include "../Random.h"
-//#include "ISO15693-A.h"
-//#include "ISO15693_sm_definitions.h"
 #include "TITagitstandard.h"
-#include "ISO15693_sm_definitions.h"
-/* Any tag shall include the general ISO15693 state machine */
 
+/* Any tag shall include the general ISO15693 state machine */
+#include "ISO15693_sm_definitions.h"
 #include "ISO15693_state_machine.h"
 
 
