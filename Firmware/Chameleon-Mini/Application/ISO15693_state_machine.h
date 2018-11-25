@@ -17,9 +17,9 @@
  
 */
 //Dereferenced Tag specific functions 
-void (*TagGetUid)(ConfigurationUidType Uid) ;
-void (*TagSetUid)(ConfigurationUidType Uid) ;
-uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+static void (*TagGetUid)(ConfigurationUidType Uid) ;
+static void (*TagSetUid)(ConfigurationUidType Uid) ;
+static uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 // example of dereferenced pointers to functions that could be used: actually not used
 //static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
