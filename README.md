@@ -7,7 +7,7 @@ TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR: A WORKING EXAMPLE
     Here explained are the steps to follow to make the C sources for an emulator based on the presented core
     ISO15693 state machine.    
 
-STEP 1: Include the necessary files in TITagitstanadrd.c:
+STEP 1: Include the necessary files in TITagitstandard.c:
 ===============================================================
     #include "../Codec/ISO15693.h"
     #include "../Memory.h"
