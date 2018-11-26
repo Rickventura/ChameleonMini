@@ -21,7 +21,7 @@ STEP 2: Add the tag's custom command in the switch statement
        ResponseByteCount = Tag_readsingle(FrameBuf, &request);         
       break;
 
-STEP 3: Include the necessary files in TITagitstanadrd.c:
+STEP 3: Include the necessary files in TITagitstandard.c:
 ===============================================================
     #include "../Codec/ISO15693.h"
     #include "../Memory.h"
