@@ -1,6 +1,10 @@
 Chameleon-Mini rev G ISO15693 STATE MACHINE
 ===========================================
 This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications.
+It is assumed that a function like TagGetUid( a function called by the state machine), when a tag is initialized, is assigned
+to a specific tag function like TagGetUid = TITagitstandardGetUid. By so doing, when the state machine calls (*TagGetUid)(Uid) it will
+call TITagitstandardGetUid(Uid) instead. As any tags will assign its own function, like TagGetUid = MyTag_GetUid, the state machine always
+gets the correct Uid. Same is true for any function which may depend on a specific tag.
 
 TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR: A WORKING EXAMPLE
 ============================================
@@ -70,15 +74,18 @@ STEP 5:Define all the functions declared in STEP2
     
  STEP 6: In ISO15693_state_machine.h declare the dereferenced functions    
  =================================================
-    Functions which calls are in the state machine must be decleared in order to be used by TITagitstandard.c
-    void (*TagGetUid)(ConfigurationUidType Uid) ;
-    void (*TagSetUid)(ConfigurationUidType Uid) ;
-    uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
+ Due to the fact that it was decided to include the state machine in every tags rather than being compiled and linked as an object file,
+ any (*TagGetUid)() call in the state machine should be declared static in ISO15693_state_machine.h. Otherwise the compiler would 
+ complain abut the same function being declared as many times as the number of tags in which it is included.
+     
+ static void (*TagGetUid)(ConfigurationUidType Uid) ;
+ static void (*TagSetUid)(ConfigurationUidType Uid) ;
+ static uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
  
  STEP 7: In ISO15693_state_machine.h add the custom command to the command switch:
  =================================================
  
     case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = Tag_readsingle(FrameBuf, &request);         
+	          ResponseByteCount = (*Tag_readsingle)(FrameBuf, &request);         
     break;
  
