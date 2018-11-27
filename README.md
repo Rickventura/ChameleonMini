@@ -1,13 +1,22 @@
 Chameleon-Mini rev G ISO15693 STATE MACHINE VERSION II(NO USE OF POINTERS TO FUNCTIONS)
 ===========================================
-This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications.
-It is assumed that a function like TagGetUid( a function called by the state machine), in the tag source file, wraps a specific tag function like  TITagitstandardGetUid.
+This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by 
+any ISO 15693 compliant tag applications.
+It is assumed that a function like TagGetUid called by the state machine, in the tag source file, wraps a specific tag function 
+like  TITagitstandardGetUid as follows.
 
-By so doing, when the state machine calls (*TagGetUid)(Uid) it will
-call TITagitstandardGetUid(Uid) instead. As any tags will assign its own function, like TagGetUid = MyTag_GetUid, the state machine always
-gets the correct Uid. Same is true for any function which may depend on a specific tag.
+	void TagGetUid(ConfigurationUidType Uid)
+	{
+    		TITagitstandardGetUid(Uid);	
+	}	
 
-
+When the state machine calls TagGetUid(Uid) it will call TITagitstandardGetUid(Uid) indirectly. 
+As other tags will wrap up their own function, the state machine always gets the correct Uid. Same is true for any other function 
+which may depend on a specific tag. Although wrapping a function into another, being like 2 calls instead of one, isn't as 
+efficient as the use of pointers to functions, it is assumed to be more palatable to those who have little or no experience with 
+pointers. Overall the method is inferior to using pointers to functions for more that a reason even though, in this limited 
+context,to all extent, it is practically equivalent. 
+	
 TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR: A WORKING EXAMPLE
 ============================================
     Here explained are the steps to follow to make the C sources for an emulator based on the presented core
