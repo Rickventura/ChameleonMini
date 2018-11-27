@@ -1,6 +1,12 @@
 Chameleon-Mini rev G ISO15693 STATE MACHINE VERSION II(NO USE OF POINTERS TO FUNCTIONS)
 ===========================================
 This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by any ISO 15693 compliant tag applications.
+It is assumed that a function like TagGetUid( a function called by the state machine), in the tag source file, wraps a specific tag function like  TITagitstandardGetUid.
+
+By so doing, when the state machine calls (*TagGetUid)(Uid) it will
+call TITagitstandardGetUid(Uid) instead. As any tags will assign its own function, like TagGetUid = MyTag_GetUid, the state machine always
+gets the correct Uid. Same is true for any function which may depend on a specific tag.
+
 
 TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR: A WORKING EXAMPLE
 ============================================
