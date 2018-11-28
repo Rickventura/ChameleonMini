@@ -46,7 +46,14 @@ STEP 3: Initialize the dereferenced functions
         State = STATE_READY;
         TagGetUid = TITagitstandardGetUid;
         TagGetUid = TITagitstandardGetUid;	
-        readsingle = TITagitstandard_readsingle;	
+        readsingle = TITagitstandard_readsingle;
+	
+	// initialize tag constants
+	TagDef.UID_SIZE		= TAG_STD_UID_SIZE;
+    	TagDef.MEM_SIZE		= TAG_STD_MEM_SIZE;
+    	TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
+    	TagDef.NUMBER_OF_SECTORS= TAG_NUMBER_OF_SECTORS;   
+TagDef.MEM_UID_ADDRESS	= TAG_MEM_UID_ADDRESS;
     }
 
 
