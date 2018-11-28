@@ -60,40 +60,40 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 	      switch ( request.cmd ) {
 
 	        case ISO15693_CMD_STAY_QUIET:         
-				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-				break;
+			ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+			break;
 
-			case ISO15693_CMD_SELECT:             
-				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-				break;
+		case ISO15693_CMD_SELECT:             
+			ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+			break;
 
 	        case ISO15693_CMD_RESET_TO_READY:     
-				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-				break;
+			ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+			break;
 
-			case ISO15693_CMD_INVENTORY:  
-				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-				break;       
+		case ISO15693_CMD_INVENTORY:  
+			ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+			break;       
 
    	       	case ISO15693_CMD_WRITE_SINGLE:       
-				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-				break;
+			ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+			break;
 
 	      	case ISO15693_CMD_READ_SINGLE:        
-				ResponseByteCount = (*readsingle)(FrameBuf, &request);         
-				break;
+			ResponseByteCount = (*readsingle)(FrameBuf, &request);         
+			break;
 
 	      	case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23       
 	          	ResponseByteCount = (*readmultiple)(FrameBuf, &request);         
-               	break;
+               		break;
 
 	      	case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
 	          	ResponseByteCount = (*getsysInfo)(FrameBuf, &request);         
-                break;
+                	break;
 
 	      	case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C
 	          	ResponseByteCount = (*getmultblocksec)(FrameBuf, &request);         
-                break;
+                	break;
 
 	 
 
