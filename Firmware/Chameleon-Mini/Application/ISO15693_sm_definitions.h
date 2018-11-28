@@ -34,3 +34,10 @@ static struct ISO15693_parameters {
 
 };
 
+static struct TagDefines{
+	uint16_t BYTES_PER_PAGE ;
+	uint16_t UID_SIZE;
+	uint16_t MEM_SIZE;     
+	uint16_t NUMBER_OF_SECTORS;
+	uint16_t MEM_UID_ADDRESS;
+} TagDef;

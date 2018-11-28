@@ -19,14 +19,10 @@
 //Dereferenced Tag specific functions 
 static void (*TagGetUid)(ConfigurationUidType Uid) ;
 static void (*TagSetUid)(ConfigurationUidType Uid) ;
-static uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);
-
-// example of dereferenced pointers to functions that could be used: actually not used
-//static uint16_t (*stay_quiet)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) =  ISO15693_stay_quiet;
-//static uint16_t (*select)(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_select;
-//static uint16_t (*reset_to_ready) (enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_reset_to_ready;
-//static uint16_t (*writesingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request) = ISO15693_writesingle;
-
+static uint16_t (*readsingle)(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+static uint16_t (*readmultiple)(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+static uint16_t (*getsysInfo)(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+static uint16_t (*getmultblocksec)(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 // ISO15693 state machine functions
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
@@ -64,31 +60,59 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 	      switch ( request.cmd ) {
 
 	        case ISO15693_CMD_STAY_QUIET:         
-                  ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-                  break;
+				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+				break;
 
-                case ISO15693_CMD_SELECT:             
-                  ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-                  break;
+			case ISO15693_CMD_SELECT:             
+				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+				break;
 
 	        case ISO15693_CMD_RESET_TO_READY:     
-                  ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-                  break;
+				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+				break;
 
-                case ISO15693_CMD_INVENTORY:  
-		  ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-                  break;       
+			case ISO15693_CMD_INVENTORY:  
+				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+				break;       
 
-   	       case ISO15693_CMD_WRITE_SINGLE:       
-	          ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-	          break;
+   	       	case ISO15693_CMD_WRITE_SINGLE:       
+				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+				break;
 
-	      case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = (*readsingle)(FrameBuf, &request);         
-                  break;
+	      	case ISO15693_CMD_READ_SINGLE:        
+				ResponseByteCount = (*readsingle)(FrameBuf, &request);         
+				break;
+
+	      	case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23       
+	          	ResponseByteCount = (*readmultiple)(FrameBuf, &request);         
+               	break;
+
+	      	case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
+	          	ResponseByteCount = (*getsysInfo)(FrameBuf, &request);         
+                break;
+
+	      	case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C
+	          	ResponseByteCount = (*getmultblocksec)(FrameBuf, &request);         
+                break;
+
+	 
+
+         
+			//#define ISO15693_CMD_GET_BLOCK_SEC      0x2C		
+			//#define ISO15693_CMD_WRITE_MULTIPLE     0x24
+			//#define ISO15693_CMD_SELECT             0x25
+			//#define ISO15693_CMD_RESET_TO_READY     0x26
+			//#define ISO15693_CMD_WRITE_AFI          0x27
+			//#define ISO15693_CMD_LOCK_AFI           0x28
+			//#define ISO15693_CMD_WRITE_DSFID        0x29
+			//#define ISO15693_CMD_LOCK_DSFID         0x2A
+
               default:
                 ResponseByteCount = 0;
                 break;
+
+
+
             }// end switch
 
            } 
@@ -123,7 +147,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
   request.cmd   = FrameBuf[ISO15693_ADDR_FLAGS + 1]; // FrameBuf[0x01] 
   request.Frame_Uid =(uint8_t *) NULL;
   request.Frame_params = (uint8_t *)NULL;
-  request.Bytes_per_Page = TAG_BYTES_PER_PAGE;
+  request.Bytes_per_Page = TagDef.BYTES_PER_PAGE;
 
  /* set flags according to 15693-3 2009_A2_2015.pdf manual Tables 3,4,5 page 9 */
   request.subcarrier_flg= FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SUBCARRIER ? 1 : 0;
@@ -147,7 +171,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
     request.select_flg   = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SELECT    ? 1 : 0;    
   }
 
-  (*TagGetUid)(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it maight be
+  (*TagGetUid)(request.tagUid); //get the tag Uid (dereferenced call to a tag specific function)
 
   if (request.address_flg){ // addressed request       
     

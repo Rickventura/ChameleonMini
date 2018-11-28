@@ -29,5 +29,6 @@ void TITagitstandardGetUid(ConfigurationUidType Uid);
 void TITagitstandardSetUid(ConfigurationUidType Uid);
 void TITagitstandardFlipUid(ConfigurationUidType Uid);
 
+
 #endif /* VICINITY_H_ */
 

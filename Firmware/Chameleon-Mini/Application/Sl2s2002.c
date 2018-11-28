@@ -17,18 +17,47 @@
 #include "../Random.h"
 #include "ISO15693-A.h"
 
-#define BYTES_PER_PAGE        4
-#define MEM_UID_ADDRESS         0x00
+/* Any tag shall include the general ISO15693 state machine */
+#include "ISO15693_sm_definitions.h"
+#include "ISO15693_state_machine.h"
 
-static enum {
-    STATE_READY,
-    STATE_SELECTED,
-    STATE_QUIET
-} State;
+
+// tag specific functions
+void Sl2s2002SetUid(ConfigurationUidType Uid);
+void Sl2s2002GetUid(ConfigurationUidType Uid);
+uint16_t Sl2s2002_readmultiple(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+uint16_t Sl2s2002_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+uint16_t Sl2s2002_getSysInfo(uint8_t *FrameBuf, struct ISO15693_parameters *request);
+uint16_t Sl2s2002_getmultBlockSec (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+
+// dereferenced functions used in ISO15693_state_machine.h     
+extern void (*TagSetUid)(ConfigurationUidType Uid);
+extern void (*TagGetUid)(ConfigurationUidType Uid);
+extern uint16_t (*readmultiple) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
+extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
+extern uint16_t (*getsysInfo) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
+extern uint16_t (*getmultblocksec) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
+
 
 void Sl2s2002AppInit(void)
 {
     State = STATE_READY;
+
+	// initialize dereferenced pointers
+    TagGetUid		= Sl2s2002GetUid;
+    TagSetUid		= Sl2s2002SetUid;
+	readsingle		= Sl2s2002_readsingle;
+	readmultiple	= Sl2s2002_readmultiple;
+	getsysInfo		= Sl2s2002_getSysInfo;
+	getmultblocksec = Sl2s2002_getmultBlockSec;
+
+	// initialize TagDef Structure with tag's #defines
+
+	TagDef.UID_SIZE			= SL2S_UID_SIZE;
+    TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
+	TagDef.BYTES_PER_PAGE	= SL2S_BYTES_PER_PAGE;
+	TagDef.NUMBER_OF_SECTORS= SL2S_NUMBER_OF_SECTORS;   
+	TagDef.MEM_UID_ADDRESS	= SL2S_MEM_UID_ADDRESS;     
 }
 
 void Sl2s2002AppReset(void)
@@ -50,131 +79,118 @@ void Sl2s2002AppTick(void)
 
 uint16_t Sl2s2002AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 {
-    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
-        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {
-            // At this point, we have a valid ISO15693 frame
-            uint8_t Command = FrameBuf[1];
-            uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;
-            uint8_t Uid[8];
-            MemoryReadBlock(Uid, MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
-            
-            switch(State) {
-            case STATE_READY:
-                if (Command == ISO15693_CMD_INVENTORY) {
-                    FrameBuf[0] = 0x00; /* Flags */
-                    FrameBuf[1] = 0x00; /* DSFID */
-                    ISO15693CopyUid(&FrameBuf[2], Uid);
-                    ResponseByteCount = 10;
-                } else if (Command == ISO15693_CMD_STAY_QUIET) {
-                    if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                        State = STATE_QUIET;
-                    }
-                } else if (Command == ISO15693_CMD_GET_SYS_INFO) {
-                    if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                        FrameBuf[0] = 0; /* Flags */
-                        FrameBuf[1] = 0x0F; /* InfoFlags */
-                        ISO15693CopyUid(&FrameBuf[2], Uid);
-                        FrameBuf[10] = 0x00;
-                        FrameBuf[11] = 0xC2;
-                        FrameBuf[12] = 0x03;
-                        FrameBuf[13] = 0x03;
-                        FrameBuf[14] = 0x01;
-                        ResponseByteCount = 15;
-                    }
-                } else if (Command == ISO15693_CMD_READ_SINGLE) {
-                      if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                          uint8_t PageAddress = FrameBuf[10];
-                          if (FrameBuf[0] & ISO15693_REQ_FLAG_OPTION)
-                          {
-                              FrameBuf[0] = 0x00; /* Flags */
-                              FrameBuf[1] = 0x00; /* security dummy to 0 */
-                              MemoryReadBlock(FrameBuf + 2, PageAddress * BYTES_PER_PAGE, BYTES_PER_PAGE);
-                              ResponseByteCount = 6;
-                          } else {
-                              FrameBuf[0] = 0x00; /* Flags */
-                              MemoryReadBlock(FrameBuf + 1, PageAddress * BYTES_PER_PAGE, BYTES_PER_PAGE);
-                              ResponseByteCount = 5;
-                          }
-                      }
-                } else if (Command == ISO15693_CMD_READ_MULTIPLE) {
-                    if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                        uint16_t PageAddress = FrameBuf[10];
-                        uint16_t PageAddressCount = FrameBuf[11] + 1;
+ return(IS015693AppProcess(FrameBuf,FrameBytes));
+}
 
-                        uint8_t * FrameBufPtr = FrameBuf + 1;
-                        if (FrameBuf[0] & ISO15693_REQ_FLAG_OPTION)
-                        {
-                            uint8_t count;
-                            for (count = 0; count < PageAddressCount; count++)
-                            {
-                                *FrameBufPtr++ = 0; // block security status = unlocked
-                                MemoryReadBlock(FrameBufPtr, PageAddress * BYTES_PER_PAGE, BYTES_PER_PAGE);
-                                FrameBufPtr += BYTES_PER_PAGE;
-                                PageAddress += 1;
-                            }
-                            ResponseByteCount = 1 + (BYTES_PER_PAGE + 1) * PageAddressCount;
-                        } else {
-                            MemoryReadBlock(FrameBufPtr, PageAddress * BYTES_PER_PAGE, BYTES_PER_PAGE * PageAddressCount);
-                            ResponseByteCount = 1 + BYTES_PER_PAGE * PageAddressCount;
-                        }
-                        FrameBuf[0] = 0; /* Flags */
-                    }
-                } else if (Command == ISO15693_CMD_GET_BLOCK_SEC) {
-                    if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                        uint8_t PageAddressStart = FrameBuf[10];
-                        uint8_t PageAddressCount = FrameBuf[11] + 1;
-                        FrameBuf[0] = 0; /* Flags */
-                        for (uint8_t i = 0; i < PageAddressCount; i++) {
-                            FrameBuf[i] = 0x00;
-                        }
-                        ResponseByteCount = 1 + PageAddressCount;
-                    }
-                }
-                break;
-            case STATE_SELECTED:
+uint16_t Sl2s2002_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request)
+{
+	/* ISO 15693 READ SINGLE request: 
+	      addressed    [FLAGS(1BYTE)][CMD(1BYTE)][UID(8BYTES)][BLOCK #]
+	                                                             ^  
+	                                                         Frame_params
 
-                break;
+	       NOT_ADDRESSED  [FLAGS(1BYTE)][CMD(1BYTE)][BLOCK #]
+	                                                 ^  
+	                                             Frame_params
+	*/
+	uint16_t ResponseByteCount = 0;	
+	uint16_t PageAddress , MemLocation; 
+  	uint8_t *FramePtr;
 
-            case STATE_QUIET:
-                if (Command == ISO15693_CMD_RESET_TO_READY) {
-                    if (ISO15693AddressedLegacy(FrameBuf, Uid)) {
-                        FrameBuf[0] = 0;
-                        ResponseByteCount = 1;
-                        State = STATE_READY;
-                    }
-                }
-                break;
 
-            default:
-                break;
-            }
-
-            if (ResponseByteCount > 0) {
-                /* There is data to be sent. Append CRC */
-                ISO15693AppendCRC(FrameBuf, ResponseByteCount);
-                ResponseByteCount += ISO15693_CRC16_SIZE;
-            }
-
-            return ResponseByteCount;
-        
-        } else { // Invalid CRC
-            return ISO15693_APP_NO_RESPONSE;
-        }
-    } else { // Min frame size not met
-        return ISO15693_APP_NO_RESPONSE;
-    }
     
+	FrameBuf[0] = ISO15693_RES_FLAG_NO_ERROR; /* Flags */
+	if (request->option_flg){
+
+		FrameBuf[1] = 0x00; /* security dummy to 0 */
+		FramePtr = FrameBuf + 2;
+		ResponseByteCount = 6;
+
+	} else {
+
+		FramePtr = FrameBuf + 1;
+		ResponseByteCount = 5;
+	}
+
+	PageAddress = *(request->Frame_params); // request->Frame_params always points to the first parameter's
+	MemLocation = PageAddress * request->Bytes_per_Page;   
+	MemoryReadBlock(FramePtr, MemLocation , request->Bytes_per_Page); 
+	return ResponseByteCount;
+}
+
+uint16_t Sl2s2002_getSysInfo(uint8_t *FrameBuf, struct ISO15693_parameters *request)
+{
+
+	uint16_t ResponseByteCount = 0;
+	
+	FrameBuf[0] = ISO15693_RES_FLAG_NO_ERROR; /* Flags */
+	FrameBuf[1] = 0x0F; /* InfoFlags */
+	ISO15693CopyUid(&FrameBuf[2], request->tagUid);		
+	FrameBuf[10] = 0x00;
+	FrameBuf[11] = 0xC2;
+	FrameBuf[12] = 0x03;
+	FrameBuf[13] = 0x03;
+	FrameBuf[14] = 0x01;
+	ResponseByteCount = 15;
+
+	
+	return ResponseByteCount ;
+}
+
+uint16_t Sl2s2002_readmultiple(uint8_t *FrameBuf, struct ISO15693_parameters *request)
+{
+	uint16_t PageAddress , blocks;
+	uint8_t  count;
+	uint8_t *FrameBufPtr; 
+	uint16_t ResponseByteCount = 0;
+	
+	PageAddress	= *(request->Frame_params + 0); // request->parameters always points to the first parameter wheter or not is addressed
+	blocks		= *(request->Frame_params + 1); // 2nd request parameter is the actual number of blocks to read		
+	FrameBuf[0] = ISO15693_RES_FLAG_NO_ERROR;
+	ResponseByteCount = 1;
+	FrameBufPtr = &FrameBuf[1]; 
+
+	for (count = 0; count < blocks ; count++){
+	
+	    /* [block security status(optional)] [data(page size)] */
+		/* repeat the above for the requested number see 15693-3 2009_A2_2015.pdf page 27 */
+
+		if (request->option_flg) {  
+			*FrameBufPtr++ = 0x00;// if option flag set add the block security status
+			ResponseByteCount += 1;
+		}
+
+		MemoryReadBlock(FrameBufPtr , PageAddress , request->Bytes_per_Page);
+		PageAddress += request->Bytes_per_Page; // next page to read from
+		FrameBufPtr += request->Bytes_per_Page; // next frameBuff position to write to.
+		ResponseByteCount += request->Bytes_per_Page;
+	}
+
+	return ResponseByteCount;
+}
+
+uint16_t Sl2s2002_getmultBlockSec(uint8_t *FrameBuf, struct ISO15693_parameters *request)
+{
+	uint16_t ResponseByteCount = 0;
+	uint8_t PageAddressCount = FrameBuf[11] + 1;
+
+	if (request.isaddressed) {
+		FrameBuf[0] = 0; /* Flags */
+		for (uint8_t i = 0; i < PageAddressCount; i++) 
+		FrameBuf[i] = 0x00;
+	}
+
+	ResponseByteCount = 1 + PageAddressCount;
+    return ResponseByteCount;
 }
 
 void Sl2s2002GetUid(ConfigurationUidType Uid)
 {
-    MemoryReadBlock(&Uid[0], MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
+    MemoryReadBlock(&Uid[0], SL2S_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
 }
 
 void Sl2s2002SetUid(ConfigurationUidType Uid)
 {
-    MemoryWriteBlock(Uid, MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
+    MemoryWriteBlock(Uid, SL2S_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
 }
-
-
 

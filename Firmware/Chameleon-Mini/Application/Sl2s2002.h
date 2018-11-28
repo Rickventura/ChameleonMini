@@ -13,6 +13,13 @@
 
 #define ISO15693_GENERIC_UID_SIZE    8 //ISO15693_UID_SIZE
 #define ISO15693_GENERIC_MEM_SIZE    8192 //ISO15693_MAX_MEM_SIZE
+/* any tag shall define the following constants */
+
+#define SL2S_UID_SIZE        ISO15693_GENERIC_UID_SIZE  
+#define SL2S_MEM_SIZE        ISO15693_GENERIC_MEM_SIZE 
+#define SL2S_BYTES_PER_PAGE      4
+#define SL2S_NUMBER_OF_SECTORS   ( TAG_STD_MEM_SIZE / TAG_BYTES_PER_PAGE )
+#define SL2S_MEM_UID_ADDRESS     0x00
 
 void Sl2s2002AppInit(void);
 void Sl2s2002AppReset(void);

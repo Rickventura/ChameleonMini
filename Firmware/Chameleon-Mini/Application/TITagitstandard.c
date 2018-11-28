@@ -18,7 +18,6 @@
 #include "Crypto1.h"
 #include "../Random.h"
 #include "TITagitstandard.h"
-
 /* Any tag shall include the general ISO15693 state machine */
 #include "ISO15693_sm_definitions.h"
 #include "ISO15693_state_machine.h"
@@ -26,6 +25,9 @@
 
 /* Tag's specific functions necessary to the ISO15693 state machine shall be declared
 and assigned to a dereferenced pointer to function used by the state machine*/
+
+
+void TITagitstandardFlipUid(ConfigurationUidType Uid);
 void TITagitstandardGetUid(ConfigurationUidType Uid);
 extern void (*TagGetUid)(ConfigurationUidType Uid); // dereferenced pointer TagGetUid used in ISO15693_state_machine.h
 
@@ -40,9 +42,18 @@ extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *re
 void TITagitstandardAppInit(void)
 {
     State = STATE_READY;
-    TagGetUid = TITagitstandardGetUid;
-    TagGetUid = TITagitstandardGetUid;	
-    readsingle = TITagitstandard_readsingle;
+	// initialize Dereferenced pointers to functions
+    TagGetUid	= TITagitstandardGetUid;
+    TagGetUid	= TITagitstandardGetUid;	
+    readsingle	= TITagitstandard_readsingle;
+
+	// initialize TagDef Structure with tag's #defines
+
+	TagDef.UID_SIZE			= TAG_STD_UID_SIZE;
+    TagDef.MEM_SIZE			= TAG_STD_MEM_SIZE; 
+	TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
+	TagDef.NUMBER_OF_SECTORS= TAG_NUMBER_OF_SECTORS;   
+	TagDef.MEM_UID_ADDRESS	= TAG_MEM_UID_ADDRESS;     
 	
 }
 
@@ -90,34 +101,34 @@ uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_paramete
   PageAddress = *(request->Frame_params); 
    
 
-  if ( PageAddress >= TAG_NUMBER_OF_SECTORS) { /* the reader is requesting a sector out of bound */
-        errflag = 1;
-	FrameBuf[ISO15693_ADDR_FLAGS]     = ISO15693_RES_FLAG_ERROR;
-	FrameBuf[ISO15693_RES_ADDR_PARAM] = ISO15693_RES_ERR_BLK_NOT_AVL; /* real TiTag standard reply with this error */
-	ResponseByteCount = 2;
-        
-  }
+	if ( PageAddress >= TAG_NUMBER_OF_SECTORS) { /* the reader is requesting a sector out of bound */
+		errflag = 1;
+		FrameBuf[ISO15693_ADDR_FLAGS]     = ISO15693_RES_FLAG_ERROR;
+		FrameBuf[ISO15693_RES_ADDR_PARAM] = ISO15693_RES_ERR_BLK_NOT_AVL; /* real TiTag standard reply with this error */
+		ResponseByteCount = 2;        
+	}
 
-  else if (request->option_flg) { /* request with option flag set */
+	else if (request->option_flg) { /* request with option flag set */
 
-          FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
-          /*Tagit standard UID is stored in blocks 8 and 9 which are blocked */
-          FrameBuf[1] = ( PageAddress == 8 || PageAddress == 9) ? 0x02 : 0x00; /* block security status: when option flag set */
-	  FramePtr = FrameBuf + 2;
-          ResponseByteCount = 6;
-  } 
+		FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR;
+		/*Tagit standard UID is stored in blocks 8 and 9 which are blocked */
+		FrameBuf[1] = ( PageAddress == 8 || PageAddress == 9) ? 0x02 : 0x00; /* block security status: when option flag set */
+		FramePtr = FrameBuf + 2;
+		ResponseByteCount = 6;
+	} 
  
-  else { /* request with option flag not set*/
-          FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR; /* Flags */
-          FramePtr = FrameBuf + 1;
-          ResponseByteCount = 5;
-  }
+	else { /* request with option flag not set*/
+		FrameBuf[ISO15693_ADDR_FLAGS] = ISO15693_RES_FLAG_NO_ERROR; /* Flags */
+		FramePtr = FrameBuf + 1;
+		ResponseByteCount = 5;
+	}
 
- if (!errflag) {
-   MemLocation = PageAddress * request->Bytes_per_Page;   
-   MemoryReadBlock(FramePtr, MemLocation , request->Bytes_per_Page); 
- }
- return ResponseByteCount;
+ 	if (!errflag) {
+		MemLocation = PageAddress * request->Bytes_per_Page;   
+		MemoryReadBlock(FramePtr, MemLocation , request->Bytes_per_Page); 
+	 }
+
+	 return ResponseByteCount;
 
 }
 
