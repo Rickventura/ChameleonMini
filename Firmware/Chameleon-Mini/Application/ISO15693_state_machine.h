@@ -84,8 +84,8 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 			break;
 
 	      	case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23       
-	          	ResponseByteCount = (*readmultiple)(FrameBuf, &request);         
-               		break;
+	        	ResponseByteCount = (*readmultiple)(FrameBuf, &request);
+			break;
 
 	      	case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
 	          	ResponseByteCount = (*getsysInfo)(FrameBuf, &request);         
