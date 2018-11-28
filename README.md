@@ -40,15 +40,16 @@ STEP 2: functions called in the state machine(dereferenced functions) must be de
 
 STEP 3: Initialize the dereferenced functions 
 =================================================
-    One way to initialize the dereferenced fuctions is to assign them in TITagitstandardAppInit.
-    void TITagitstandardAppInit(void)
+One way to initialize the dereferenced fuctions is to assign them in TITagitstandardAppInit.
+
+void TITagitstandardAppInit(void)
     {
         State = STATE_READY;
-        TagGetUid = TITagitstandardGetUid;
-        TagGetUid = TITagitstandardGetUid;	
-        readsingle = TITagitstandard_readsingle;
 	
-	// initialize tag constants
+	TagGetUid = TITagitstandardGetUid;
+	TagGetUid = TITagitstandardGetUid;
+	readsingle = TITagitstandard_readsingle;
+	// define tag's constants	
 	TagDef.UID_SIZE		= TAG_STD_UID_SIZE;
 	TagDef.MEM_SIZE		= TAG_STD_MEM_SIZE;
 	TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
