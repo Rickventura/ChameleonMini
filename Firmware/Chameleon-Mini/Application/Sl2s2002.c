@@ -54,7 +54,7 @@ void Sl2s2002AppInit(void)
 	// initialize TagDef Structure with tag's #defines
 
 	TagDef.UID_SIZE			= SL2S_UID_SIZE;
-    TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
+    	TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
 	TagDef.BYTES_PER_PAGE	= SL2S_BYTES_PER_PAGE;
 	TagDef.NUMBER_OF_SECTORS= SL2S_NUMBER_OF_SECTORS;   
 	TagDef.MEM_UID_ADDRESS	= SL2S_MEM_UID_ADDRESS;     
