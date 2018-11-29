@@ -1,10 +1,12 @@
 /*
- * SL2s2002.c
+ * ISO15693.c
  *
- *  Created on: Nov-28-2018
- *      Author: @Rickventura
+ *  Created on: 01-03-2017
+ *      Author: Phillip Nash
  * 
- * 
+ *  TODO:
+ *    - ISO15693AddressedLegacy should be replaced with ISO15693Addressed and appropriate check
+ *      should be performed (see TITagitstandard.c) - ceres-c
  */
 
 
@@ -42,17 +44,17 @@ void Sl2s2002AppInit(void)
     State = STATE_READY;
 
 	// initialize dereferenced pointers
-	TagGetUid	= Sl2s2002GetUid;
-	TagSetUid	= Sl2s2002SetUid;
-	readsingle	= Sl2s2002_readsingle;
+    TagGetUid		= Sl2s2002GetUid;
+    TagSetUid		= Sl2s2002SetUid;
+	readsingle		= Sl2s2002_readsingle;
 	readmultiple	= Sl2s2002_readmultiple;
-	getsysInfo	= Sl2s2002_getSysInfo;
+	getsysInfo		= Sl2s2002_getSysInfo;
 	getmultblocksec = Sl2s2002_getmultBlockSec;
 
 	// initialize TagDef Structure with tag's #defines
 
-	TagDef.UID_SIZE		= SL2S_UID_SIZE;
-    	TagDef.MEM_SIZE		= SL2S_MEM_SIZE; 
+	TagDef.UID_SIZE			= SL2S_UID_SIZE;
+    TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
 	TagDef.BYTES_PER_PAGE	= SL2S_BYTES_PER_PAGE;
 	TagDef.NUMBER_OF_SECTORS= SL2S_NUMBER_OF_SECTORS;   
 	TagDef.MEM_UID_ADDRESS	= SL2S_MEM_UID_ADDRESS;     
@@ -172,7 +174,7 @@ uint16_t Sl2s2002_getmultBlockSec(uint8_t *FrameBuf, struct ISO15693_parameters 
 	uint16_t ResponseByteCount = 0;
 	uint8_t PageAddressCount = FrameBuf[11] + 1;
 
-	if (request.isaddressed) {
+	if (request->isaddressed) {
 		FrameBuf[0] = 0; /* Flags */
 		for (uint8_t i = 0; i < PageAddressCount; i++) 
 		FrameBuf[i] = 0x00;
