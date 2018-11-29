@@ -4,9 +4,7 @@
  *  Created on: Nov-28-2018
  *      Author: @Rickventura
  * 
- *  TODO:
- *    - ISO15693AddressedLegacy should be replaced with ISO15693Addressed and appropriate check
- *      should be performed (see TITagitstandard.c) - ceres-c
+ *  
  */
 
 
