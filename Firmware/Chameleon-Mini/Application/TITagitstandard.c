@@ -44,7 +44,7 @@ void TITagitstandardAppInit(void)
     State = STATE_READY;
 	// initialize Dereferenced pointers to functions
     TagGetUid	= TITagitstandardGetUid;
-    TagGetUid	= TITagitstandardGetUid;	
+    TagSetUid	= TITagitstandardSetUid;	
     readsingle	= TITagitstandard_readsingle;
 
 	// initialize TagDef Structure with tag's #defines
