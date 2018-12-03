@@ -29,14 +29,10 @@ STEP 2: functions called by the state machine(dereferenced functions) must be de
 ===============================================================
     Assuming TITagitstandardGetUid is tag specific and (*TagGetUid)() is the function called in the state machine
 
-    void TITagitstandardGetUid(ConfigurationUidType Uid); this is the usual function declaration
-    extern void (*TagGetUid)(ConfigurationUidType Uid);   this is the dereferenced function declared in the state machine
-        
-    void TITagitstandardSetUid(ConfigurationUidType Uid);    
-    extern void (*TagSetUid)(ConfigurationUidType Uid); 
-    
+    void TITagitstandardGetUid(ConfigurationUidType Uid); this is the usual function declaration           
+    void TITagitstandardSetUid(ConfigurationUidType Uid);            
     uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
-    extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request);  
+    
 
 STEP 3: Initialize the dereferenced functions 
 =================================================
