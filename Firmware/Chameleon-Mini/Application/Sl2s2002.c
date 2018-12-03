@@ -32,17 +32,16 @@ void Sl2s2002AppInit(void)
     State = STATE_READY;
 
 	// initialize dereferenced pointers
-    TagGetUid		= Sl2s2002GetUid;
-    TagSetUid		= Sl2s2002SetUid;
+	TagGetUid		= Sl2s2002GetUid;
+	TagSetUid		= Sl2s2002SetUid;
 	readsingle		= Sl2s2002_readsingle;
 	readmultiple	= Sl2s2002_readmultiple;
 	getsysInfo		= Sl2s2002_getSysInfo;
 	getmultblocksec	= Sl2s2002_getmultBlockSec;
 
 	// initialize TagDef Structure with tag's #defines
-
 	TagDef.UID_SIZE			= SL2S_UID_SIZE;
-    TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
+	TagDef.MEM_SIZE			= SL2S_MEM_SIZE; 
 	TagDef.BYTES_PER_PAGE	= SL2S_BYTES_PER_PAGE;
 	TagDef.NUMBER_OF_SECTORS= SL2S_NUMBER_OF_SECTORS;   
 	TagDef.MEM_UID_ADDRESS	= SL2S_MEM_UID_ADDRESS;     
