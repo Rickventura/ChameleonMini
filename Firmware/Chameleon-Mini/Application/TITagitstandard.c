@@ -26,9 +26,7 @@
 /* Tag's specific functions necessary to the ISO15693 state machine shall be declared
 and assigned to a dereferenced pointer to function used by the state machine*/
 
-
-static void Tagit_GetUid(ConfigurationUidType Uid);
-uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
+static uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
 
 void TITagitstandardAppInit(void)
 {
