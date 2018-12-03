@@ -20,6 +20,7 @@
 #define TAG_BYTES_PER_PAGE      4
 #define TAG_NUMBER_OF_SECTORS   ( TAG_STD_MEM_SIZE / TAG_BYTES_PER_PAGE )
 #define TAG_MEM_UID_ADDRESS     0x20
+
 void TITagitstandardAppInit(void);
 void TITagitstandardAppReset(void);
 void TITagitstandardAppTask(void);
@@ -28,7 +29,6 @@ uint16_t TITagitstandardAppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
 void TITagitstandardGetUid(ConfigurationUidType Uid);
 void TITagitstandardSetUid(ConfigurationUidType Uid);
 void TITagitstandardFlipUid(ConfigurationUidType Uid);
-
 
 #endif /* VICINITY_H_ */
 

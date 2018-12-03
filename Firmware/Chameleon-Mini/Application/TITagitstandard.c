@@ -33,17 +33,21 @@ void TITagitstandardAppInit(void)
     State = STATE_READY;
 	// initialize TagDef Structure with tag's #defines
 
-	TagDef.UID_SIZE		= TAG_STD_UID_SIZE;
-	TagDef.MEM_SIZE		= TAG_STD_MEM_SIZE; 
+	TagDef.UID_SIZE			= TAG_STD_UID_SIZE;
+	TagDef.MEM_SIZE			= TAG_STD_MEM_SIZE; 
 	TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
 	TagDef.NUMBER_OF_SECTORS= TAG_NUMBER_OF_SECTORS;   
 	TagDef.MEM_UID_ADDRESS	= TAG_MEM_UID_ADDRESS; 
 
-	// initialize Dereferenced pointers to functions
-   	TagGetUid	= TITagitstandardGetUid;
+	// initialize Dereferenced pointers to functions  
+	ISO15693_SM_INIT_FUNCIONPOINTERS();
+	// set Tag specific pointers to functions
+	TagGetUid	= TITagitstandardGetUid;
 	TagSetUid	= TITagitstandardSetUid;	
 	readsingle	= TITagitstandard_readsingle;
-	
+
+
+
 }
 
 void TITagitstandardAppReset(void)

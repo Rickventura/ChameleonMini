@@ -28,7 +28,8 @@ static uint16_t (*getmultblocksec)(uint8_t *FrameBuf, struct ISO15693_parameters
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
 static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters *request , uint16_t *ResponseByteCount );
 static uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
-
+static uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf);
+static void ISO15693_SM_INIT_FUNCIONPOINTERS();
 
 // ISO15693 command functions
 static uint16_t ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request );
@@ -40,60 +41,61 @@ static uint16_t ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_paramete
             
 uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
-{   
-     
-   
-    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
-        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {
-         
-            // At this point, we have a valid ISO15693 frame            
-            uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
-            uint8_t mayExecute = 0;
-	    struct ISO15693_parameters request;            
-            
-            
-            ResponseByteCount = 0;
-            request    = ISO15693_extract_par (FrameBuf);	
-            mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
 
-            if (mayExecute){ 
+{   
+	
+    uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
+	 
+    
+
+    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
+        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {     		
+        // At this point, we have a valid ISO15693 frame            
+		uint8_t mayExecute = 0;    
+		struct ISO15693_parameters request;
+                       
+		ResponseByteCount = 0;
+		request    = ISO15693_extract_par (FrameBuf);	
+		mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
+
+		if (mayExecute){ 
 	      switch ( request.cmd ) {
 
 	        case ISO15693_CMD_STAY_QUIET:         
-			ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-			break;
+				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+				break;
 
-		case ISO15693_CMD_SELECT:             
-			ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-			break;
+			case ISO15693_CMD_SELECT:             
+				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+				break;
 
 	        case ISO15693_CMD_RESET_TO_READY:     
-			ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-			break;
+				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+				break;
 
-		case ISO15693_CMD_INVENTORY:  
-			ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-			break;       
+			case ISO15693_CMD_INVENTORY:  
+				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+				break;       
 
    	       	case ISO15693_CMD_WRITE_SINGLE:       
-			ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-			break;
+				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+				break;
 
 	      	case ISO15693_CMD_READ_SINGLE:        
-			ResponseByteCount = (*readsingle)(FrameBuf, &request);         
-			break;
+				ResponseByteCount = (*readsingle)(FrameBuf, &request);         
+				break;
 
 	      	case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23       
-	        	ResponseByteCount = (*readmultiple)(FrameBuf, &request);
-			break;
+	          	ResponseByteCount = (*readmultiple)(FrameBuf, &request);         
+               	break;
 
 	      	case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
 	          	ResponseByteCount = (*getsysInfo)(FrameBuf, &request);         
-                	break;
+                break;
 
-	      	case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C
+	      	case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C				
 	          	ResponseByteCount = (*getmultblocksec)(FrameBuf, &request);         
-                	break;
+                break;
 
 	 
 
@@ -115,7 +117,7 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
             }// end switch
 
-           } 
+           } // end if mayExecute
 
            if (ResponseByteCount > 0) {
                 /* There is data to be sent. Append CRC */
@@ -158,7 +160,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
   request.select_flg    = 0;
   request.option_flg    = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_OPTION     ? 1 : 0;
   request.RFU_flg       = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_RFU        ? 1 : 0;
-  request.AFI_flg      = 0;
+  request.AFI_flg      	= 0;
   request.Nb_slot_flg   = 0;
  
    if (request.inventory_flg ) { // when inventory flag is set flags set according to table 5
@@ -362,4 +364,20 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
 
 }
 
+uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf)
+{
+				FrameBuf[0]=0x01;
+				FrameBuf[1]=0x01;
+				
 
+	return 2;
+
+}
+
+void ISO15693_SM_INIT_FUNCIONPOINTERS()
+{
+	readsingle		= IS015693_CMDNotSuported;
+	readmultiple	= IS015693_CMDNotSuported;
+	getsysInfo		= IS015693_CMDNotSuported;
+	getmultblocksec = IS015693_CMDNotSuported;
+}
