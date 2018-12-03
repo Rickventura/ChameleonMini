@@ -27,38 +27,37 @@
 and assigned to a dereferenced pointer to function used by the state machine*/
 
 
-void TITagitstandardFlipUid(ConfigurationUidType Uid);
-void TITagitstandardGetUid(ConfigurationUidType Uid);
-extern void (*TagGetUid)(ConfigurationUidType Uid); // dereferenced pointer TagGetUid used in ISO15693_state_machine.h
-
-void TITagitstandardSetUid(ConfigurationUidType Uid);
-extern void (*TagSetUid)(ConfigurationUidType Uid); // dereferenced pointer TagSetUid used in ISO15693_state_machine.h
-
+static void Tagit_GetUid(ConfigurationUidType Uid);
 uint16_t TITagitstandard_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);   
-extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request); // dereferenced pointer readsingle  used in ISO15693_state_machine.h     
-
-
 
 void TITagitstandardAppInit(void)
 {
     State = STATE_READY;
+	// initialize TagDef Structure with tag's #defines
+
+	TagDef.UID_SIZE			= TAG_STD_UID_SIZE;
+    TagDef.MEM_SIZE			= TAG_STD_MEM_SIZE; 
+	TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
+	TagDef.NUMBER_OF_SECTORS= TAG_NUMBER_OF_SECTORS;   
+	TagDef.MEM_UID_ADDRESS	= TAG_MEM_UID_ADDRESS; 
 	// initialize Dereferenced pointers to functions
-    TagGetUid	= TITagitstandardGetUid;
+    
+	TagGetUid	= TITagitstandardGetUid;
     TagSetUid	= TITagitstandardSetUid;	
     readsingle	= TITagitstandard_readsingle;
+	//readmultiple= NULL;
+	//getsysInfo	= NULL;
+	//getmultblocksec=NULL;
 
-	// initialize TagDef Structure with tag's #defines
-    TagDef.UID_SIZE		= TAG_STD_UID_SIZE;
-    TagDef.MEM_SIZE		= TAG_STD_MEM_SIZE;
-    TagDef.BYTES_PER_PAGE	= TAG_BYTES_PER_PAGE;
-    TagDef.NUMBER_OF_SECTORS	= TAG_NUMBER_OF_SECTORS;   
-    TagDef.MEM_UID_ADDRESS	= TAG_MEM_UID_ADDRESS;     
-	
+
+
 }
 
 void TITagitstandardAppReset(void)
 {
     State = STATE_READY;
+	
+    
 }
 
 
@@ -73,6 +72,8 @@ void TITagitstandardAppTick(void)
 }
 
 uint16_t TITagitstandardAppProcess  (uint8_t* FrameBuf, uint16_t FrameBytes){
+	    
+	
     return(IS015693AppProcess(FrameBuf,FrameBytes));
 
 }
@@ -97,7 +98,7 @@ uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_paramete
    */
 
   // request->Frame_params is assumed to be correctly assigned by the extract_param function to point to the block # parameter(PageAddress) 
-  PageAddress = *(request->Frame_params); 
+	PageAddress = *(request->Frame_params); 
    
 
 	if ( PageAddress >= TAG_NUMBER_OF_SECTORS) { /* the reader is requesting a sector out of bound */
@@ -134,7 +135,6 @@ uint16_t TITagitstandard_readsingle( uint8_t *FrameBuf, struct ISO15693_paramete
 void TITagitstandardGetUid(ConfigurationUidType Uid)
 {
     MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
-
     // Reverse UID after reading it
     TITagitstandardFlipUid(Uid);
 }
