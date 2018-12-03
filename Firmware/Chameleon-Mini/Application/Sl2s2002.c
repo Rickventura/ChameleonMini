@@ -21,20 +21,10 @@
 
 
 // tag specific functions
-void Sl2s2002SetUid(ConfigurationUidType Uid);
-void Sl2s2002GetUid(ConfigurationUidType Uid);
 uint16_t Sl2s2002_readmultiple(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 uint16_t Sl2s2002_readsingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 uint16_t Sl2s2002_getSysInfo(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 uint16_t Sl2s2002_getmultBlockSec (uint8_t *FrameBuf, struct ISO15693_parameters *request);
-
-// dereferenced functions used in ISO15693_state_machine.h     
-extern void (*TagSetUid)(ConfigurationUidType Uid);
-extern void (*TagGetUid)(ConfigurationUidType Uid);
-extern uint16_t (*readmultiple) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
-extern uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
-extern uint16_t (*getsysInfo) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
-extern uint16_t (*getmultblocksec) (uint8_t *FrameBuf, struct ISO15693_parameters *request); 
 
 
 void Sl2s2002AppInit(void)
@@ -47,7 +37,7 @@ void Sl2s2002AppInit(void)
 	readsingle		= Sl2s2002_readsingle;
 	readmultiple	= Sl2s2002_readmultiple;
 	getsysInfo		= Sl2s2002_getSysInfo;
-	getmultblocksec = Sl2s2002_getmultBlockSec;
+	getmultblocksec	= Sl2s2002_getmultBlockSec;
 
 	// initialize TagDef Structure with tag's #defines
 
@@ -137,8 +127,7 @@ uint16_t Sl2s2002_getSysInfo(uint8_t *FrameBuf, struct ISO15693_parameters *requ
 
 uint16_t Sl2s2002_readmultiple(uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
-	uint16_t PageAddress , blocks;
-	uint8_t  count;
+	uint16_t PageAddress , blocks ,  count;
 	uint8_t *FrameBufPtr; 
 	uint16_t ResponseByteCount = 0;
 	
@@ -169,16 +158,31 @@ uint16_t Sl2s2002_readmultiple(uint8_t *FrameBuf, struct ISO15693_parameters *re
 
 uint16_t Sl2s2002_getmultBlockSec(uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
+/*
+   0    1        2            3
+ flags cmd  First block  Numb of blocks
+
+   0    1                    10            11
+ flags cmd  uid(optional) First block  Numb of blocks
+
+*/
 	uint16_t ResponseByteCount = 0;
-	uint8_t PageAddressCount = FrameBuf[11] + 1;
+	uint16_t i,  BlocksCount , FirstBlock , LastBlock ;
+	uint8_t *FramePtr ;
+ 
 
-	if (request->isaddressed) {
-		FrameBuf[0] = 0; /* Flags */
-		for (uint8_t i = 0; i < PageAddressCount; i++) 
-		FrameBuf[i] = 0x00;
-	}
 
-	ResponseByteCount = 1 + PageAddressCount;
+	FirstBlock  = *(request->Frame_params + 0);
+	BlocksCount = *(request->Frame_params + 1); // number of blocks  
+    LastBlock = FirstBlock + BlocksCount ;
+
+	FrameBuf[0] = 0; /* Flags */
+    FramePtr = (FrameBuf + 1);
+	
+	for ( i = FirstBlock; i < LastBlock ; i++)        
+	    *FramePtr++ = 0x00; // blocks < 4 are system blocks
+
+	ResponseByteCount = 1 + BlocksCount;
     return ResponseByteCount;
 }
 
