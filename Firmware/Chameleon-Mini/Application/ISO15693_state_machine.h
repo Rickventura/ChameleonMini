@@ -58,36 +58,35 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 		mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
 
 		if (mayExecute){ 
-	      switch ( request.cmd ) {
+	      		switch ( request.cmd ) {
+	        		case ISO15693_CMD_STAY_QUIET:         
+					ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+					break;
 
-	        case ISO15693_CMD_STAY_QUIET:         
-			ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-			break;
+				case ISO15693_CMD_SELECT:             
+					ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+					break;
 
-		case ISO15693_CMD_SELECT:             
-			ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-			break;
+	        		case ISO15693_CMD_RESET_TO_READY:     
+					ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+					break;
 
-	        case ISO15693_CMD_RESET_TO_READY:     
-			ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-			break;
+				case ISO15693_CMD_INVENTORY:  
+					ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+					break;       
 
-		case ISO15693_CMD_INVENTORY:  
-			ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-			break;       
-
-   	       	case ISO15693_CMD_WRITE_SINGLE:       
-			ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-			break;
+   	       			case ISO15693_CMD_WRITE_SINGLE:       
+					ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+					break;
 
 
-		default:
-			ResponseByteCount = Tag_SWITCH_COMMANDS(FrameBuf,&request);
-                break;
+				default:
+					ResponseByteCount = Tag_SWITCH_COMMANDS(FrameBuf,&request);
+                			break;
 
-            }// end switch
+            		}// end switch
 
-           } // end if mayExecute
+           	} // end if mayExecute
 
            if (ResponseByteCount > 0) {
                 /* There is data to be sent. Append CRC */
