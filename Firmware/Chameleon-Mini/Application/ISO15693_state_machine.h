@@ -28,7 +28,7 @@ static uint16_t (*getmultblocksec)(uint8_t *FrameBuf, struct ISO15693_parameters
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
 static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters *request , uint16_t *ResponseByteCount );
 static uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
-static uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf);
+static uint16_t IS015693_CMDNotSupported(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static void ISO15693_SM_INIT_FUNCIONPOINTERS();
 
 // ISO15693 command functions
@@ -364,20 +364,18 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
 
 }
 
-uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf)
+uint16_t IS015693_CMDNotSupported(uint8_t *FrameBuf, struct ISO15693_parameters *request)
 {
-				FrameBuf[0]=0x01;
-				FrameBuf[1]=0x01;
-				
-
+	FrameBuf[0]=0x01;
+	FrameBuf[1]=0x01;			
 	return 2;
 
 }
 
 void ISO15693_SM_INIT_FUNCIONPOINTERS()
 {
-	readsingle		= IS015693_CMDNotSuported;
-	readmultiple	= IS015693_CMDNotSuported;
-	getsysInfo		= IS015693_CMDNotSuported;
-	getmultblocksec = IS015693_CMDNotSuported;
+	readsingle		= IS015693_CMDNotSupported;
+	readmultiple	= IS015693_CMDNotSupported;
+	getsysInfo		= IS015693_CMDNotSupported;
+	getmultblocksec = IS015693_CMDNotSupported;
 }
