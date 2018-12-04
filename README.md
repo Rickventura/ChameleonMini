@@ -24,7 +24,7 @@ TI Tag-it HF-I STANDARD TRANSPONDER EMULATOR: A WORKING EXAMPLE
 
 STEP 1: ISO15693_state_machine.h wrapper functions    
 =================================================
-Since the state machine is included as a header in all tag sources, functions wrapper must be declared as static in the state machine or in the tag file.
+Since the state machine is included as a header in all tag sources, functions wrapper must be declared as static in the state machine or in tag files.
 All wrapper functions, commonly used by any tag, and necessary to operate the state machine, are already declared in ISO15693_state_machine.h.
 For instance the state machine calls a wrapper function  "TagGetUid", in the TI Tag-it case TITagitstandardGetUid flips the UID head to tail which may not be the case with other tags. In ISO15693_state_machine.h. we'll have a declaration like 
 
