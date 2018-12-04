@@ -105,15 +105,6 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
 }
 
-uint16_t CMDNotSuported(uint8_t *FrameBuf)
-{
-				FrameBuf[0]=0x01;
-				FrameBuf[1]=0x01;
-				
-
-	return 2;
-
-}
 struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
 {
   /* ISO 15693 general request: 
