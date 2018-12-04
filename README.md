@@ -62,15 +62,14 @@ The following two functions must be declared external as they are used in file .
 
 	void TITagitstandardGetUid(ConfigurationUidType Uid);
 	void TITagitstandardSetUid(ConfigurationUidType Uid);
-
 	void TITagitstandardGetUid(ConfigurationUidType Uid)
-    	{	
+	{	
         	MemoryReadBlock(&Uid[0], TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);        
         	TITagitstandardFlipUid(Uid);
-    	}	
-
-    	void TITagitstandardSetUid(ConfigurationUidType Uid)
-    	{
+	}
+	
+	void TITagitstandardSetUid(ConfigurationUidType Uid)
+	{
         	TITagitstandardFlipUid(Uid);    
         	MemoryWriteBlock(Uid, TAG_MEM_UID_ADDRESS, ActiveConfiguration.UidSize);
 	}
