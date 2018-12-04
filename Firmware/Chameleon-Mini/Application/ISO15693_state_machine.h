@@ -4,27 +4,30 @@
  *  Created by rickventura on: Nov-16-2018 
  *        
  *      
- *  For those who dislike pointers to functions, this is a second way to split a general 15693 state machine from tags.
- *  Static declarations of Tag dependent functions allow to share function names accross different tags.
- *  Same as dereferencing withouth the use of pointers to funcions.
+ *  A more general 15693 state machine. 
+ *  Dereferenced functions (pointer to functions) are used in case tags use different function for the same purpouse.
+ *  Reuse of this code is supposed to speedup and generalize code making for different 15693 tags.
  *      
  */
 
 
-/* 
- All functions names shared by different tags should be declared here as static 
- The actual functions are to be defined in their respective tag source file. 
+/* Dereferenced Tag specific functions: 
+ Function IS015693AppProcess is supposed to be a general 15693 state machine including responses to all possible commands.
+ 	  
+ 
 */
+//Dereferenced Tag specific functions 
+              
 static void TagGetUid(ConfigurationUidType Uid) ;
-static void TagSetUid(ConfigurationUidType Uid) ;
-static uint16_t Tag_readsingle (uint8_t *FrameBuf, struct ISO15693_parameters *request);
+
 
 
 // ISO15693 state machine functions
 static struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf);
 static uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters *request , uint16_t *ResponseByteCount );
 static uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes);
-
+static uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf);
+static uint16_t Tag_SWITCH_COMMANDS(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
 // ISO15693 command functions
 static uint16_t ISO15693_inventory ( uint8_t *FrameBuf , struct ISO15693_parameters *request );
@@ -33,57 +36,58 @@ static uint16_t ISO15693_select(enum status *State , uint8_t *FrameBuf, struct I
 static uint16_t ISO15693_reset_to_ready(enum status *State , uint8_t *FrameBuf, struct ISO15693_parameters *request);
 static uint16_t ISO15693_writesingle(uint8_t *FrameBuf, struct ISO15693_parameters *request);
 
+uint16_t CMDNotSuported(uint8_t *FrameBuf);
             
 uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
-{   
-     
-   
-    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
-        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {
-         
-            // At this point, we have a valid ISO15693 frame            
-            uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
-            uint8_t mayExecute = 0;
-	    struct ISO15693_parameters request;            
-            
-            
-            ResponseByteCount = 0;
-            request    = ISO15693_extract_par (FrameBuf);	
-            mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
 
-            if (mayExecute){ 
+{   
+	
+    uint16_t ResponseByteCount = ISO15693_APP_NO_RESPONSE;            
+	 
+    
+
+    if (FrameBytes >= ISO15693_MIN_FRAME_SIZE) {
+        if(ISO15693CheckCRC(FrameBuf, FrameBytes - ISO15693_CRC16_SIZE)) {     		
+        // At this point, we have a valid ISO15693 frame            
+		uint8_t mayExecute = 0;    
+		struct ISO15693_parameters request;
+                       
+		ResponseByteCount = 0;
+		request    = ISO15693_extract_par (FrameBuf);	
+		mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
+
+		if (mayExecute){ 
 	      switch ( request.cmd ) {
 
 	        case ISO15693_CMD_STAY_QUIET:         
-                  ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-                  break;
+				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+				break;
 
-                case ISO15693_CMD_SELECT:             
-                  ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-                  break;
+			case ISO15693_CMD_SELECT:             
+				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+				break;
 
 	        case ISO15693_CMD_RESET_TO_READY:     
-                  ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-                  break;
+				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+				break;
 
-                case ISO15693_CMD_INVENTORY:  
-		  ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-                  break;       
+			case ISO15693_CMD_INVENTORY:  
+				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+				break;       
 
-   	       case ISO15693_CMD_WRITE_SINGLE:       
-	          ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-	          break;
+   	       	case ISO15693_CMD_WRITE_SINGLE:       
+				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+				break;
 
-	      case ISO15693_CMD_READ_SINGLE:        
-	          ResponseByteCount = Tag_readsingle(FrameBuf, &request);         
-                  break;
-              default:
-                ResponseByteCount = 0;
+
+			default:
+				ResponseByteCount = Tag_SWITCH_COMMANDS(FrameBuf,&request);
                 break;
+
             }// end switch
 
-           } 
+           } // end if mayExecute
 
            if (ResponseByteCount > 0) {
                 /* There is data to be sent. Append CRC */
@@ -102,6 +106,15 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 
 }
 
+uint16_t CMDNotSuported(uint8_t *FrameBuf)
+{
+				FrameBuf[0]=0x01;
+				FrameBuf[1]=0x01;
+				
+
+	return 2;
+
+}
 struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
 {
   /* ISO 15693 general request: 
@@ -115,7 +128,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
   request.cmd   = FrameBuf[ISO15693_ADDR_FLAGS + 1]; // FrameBuf[0x01] 
   request.Frame_Uid =(uint8_t *) NULL;
   request.Frame_params = (uint8_t *)NULL;
-  request.Bytes_per_Page = TAG_BYTES_PER_PAGE;
+  request.Bytes_per_Page = TagDef.BYTES_PER_PAGE;
 
  /* set flags according to 15693-3 2009_A2_2015.pdf manual Tables 3,4,5 page 9 */
   request.subcarrier_flg= FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SUBCARRIER ? 1 : 0;
@@ -126,7 +139,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
   request.select_flg    = 0;
   request.option_flg    = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_OPTION     ? 1 : 0;
   request.RFU_flg       = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_RFU        ? 1 : 0;
-  request.AFI_flg      = 0;
+  request.AFI_flg      	= 0;
   request.Nb_slot_flg   = 0;
  
    if (request.inventory_flg ) { // when inventory flag is set flags set according to table 5
@@ -139,7 +152,7 @@ struct ISO15693_parameters ISO15693_extract_par (uint8_t *FrameBuf)
     request.select_flg   = FrameBuf[ISO15693_ADDR_FLAGS] & ISO15693_REQ_FLAG_SELECT    ? 1 : 0;    
   }
 
-  TagGetUid(request.tagUid); // get the actual tag uid using a pointer to a tag specific function whatever it maight be
+  TagGetUid(request.tagUid); //get the tag Uid (dereferenced call to a tag specific function)
 
   if (request.address_flg){ // addressed request       
     
@@ -329,5 +342,13 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
  return mayExecute; // returns whether a command may be executed
 
 }
+uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf)
+{
+				FrameBuf[0]=0x01;
+				FrameBuf[1]=0x01;
+				
 
+	return 2;
+
+}
 

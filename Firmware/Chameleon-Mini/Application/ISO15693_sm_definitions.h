@@ -18,8 +18,8 @@ static struct ISO15693_parameters {
  uint8_t *Frame_Uid;
  uint8_t *Frame_params;
  enum request_addressed isaddressed;
- ISO15693UidType tagUid;
- uint16_t Bytes_per_Page  ;
+ ConfigurationUidType tagUid;
+ uint8_t Bytes_per_Page  ;
 
  unsigned int subcarrier_flg:1;
  unsigned int data_rate_flg :1;
@@ -34,3 +34,10 @@ static struct ISO15693_parameters {
 
 };
 
+static struct TagDefines{
+	uint16_t BYTES_PER_PAGE ;
+	uint16_t UID_SIZE;
+	uint16_t MEM_SIZE;     
+	uint16_t NUMBER_OF_SECTORS;
+	uint16_t MEM_UID_ADDRESS;
+} TagDef;

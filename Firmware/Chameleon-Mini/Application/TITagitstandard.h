@@ -20,6 +20,7 @@
 #define TAG_BYTES_PER_PAGE      4
 #define TAG_NUMBER_OF_SECTORS   ( TAG_STD_MEM_SIZE / TAG_BYTES_PER_PAGE )
 #define TAG_MEM_UID_ADDRESS     0x20
+
 void TITagitstandardAppInit(void);
 void TITagitstandardAppReset(void);
 void TITagitstandardAppTask(void);
