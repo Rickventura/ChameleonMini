@@ -57,48 +57,43 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 		ResponseByteCount = 0;
 		request    = ISO15693_extract_par (FrameBuf);	
 		mayExecute = ISO15693_status_check( &State , &request , &ResponseByteCount );
-
 		if (mayExecute){ 
-	      switch ( request.cmd ) {
+	      		switch ( request.cmd ) {
+	        		case ISO15693_CMD_STAY_QUIET:
+			      		ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+			      		break;
 
-	        case ISO15693_CMD_STAY_QUIET:         
-				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-				break;
+				case ISO15693_CMD_SELECT:
+			      		ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+			      		break;
 
-			case ISO15693_CMD_SELECT:             
-				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-				break;
+	        			case ISO15693_CMD_RESET_TO_READY:
+			      		ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request);
+			      		break;
 
-	        case ISO15693_CMD_RESET_TO_READY:     
-				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-				break;
+				case ISO15693_CMD_INVENTORY:
+			      		ResponseByteCount = ISO15693_inventory(FrameBuf , &request);
+			      		break;       
 
-			case ISO15693_CMD_INVENTORY:  
-				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-				break;       
+   	       			case ISO15693_CMD_WRITE_SINGLE:
+			      		ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);
+			      		break;
 
-   	       	case ISO15693_CMD_WRITE_SINGLE:       
-				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-				break;
+	      			case ISO15693_CMD_READ_SINGLE:
+			      		ResponseByteCount = (*readsingle)(FrameBuf, &request);
+			      		break;
+					
+	      			case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23
+			      		ResponseByteCount = (*readmultiple)(FrameBuf, &request);
+			      		break;
 
-	      	case ISO15693_CMD_READ_SINGLE:        
-				ResponseByteCount = (*readsingle)(FrameBuf, &request);         
-				break;
+	      			case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
+			      		ResponseByteCount = (*getsysInfo)(FrameBuf, &request);
+			      		break;
 
-	      	case ISO15693_CMD_READ_MULTIPLE:// CMD = 0x23       
-	          	ResponseByteCount = (*readmultiple)(FrameBuf, &request);         
-               	break;
-
-	      	case ISO15693_CMD_GET_SYS_INFO:// CMD = 0x2B
-	          	ResponseByteCount = (*getsysInfo)(FrameBuf, &request);         
-                break;
-
-	      	case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C				
-	          	ResponseByteCount = (*getmultblocksec)(FrameBuf, &request);         
-                break;
-
-	 
-
+	      			case ISO15693_CMD_GET_BLOCK_SEC:// CMD = 0x2C
+				      ResponseByteCount = (*getmultblocksec)(FrameBuf, &request);
+				      break;
          
 			//#define ISO15693_CMD_GET_BLOCK_SEC      0x2C		
 			//#define ISO15693_CMD_WRITE_MULTIPLE     0x24
@@ -108,24 +103,21 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 			//#define ISO15693_CMD_LOCK_AFI           0x28
 			//#define ISO15693_CMD_WRITE_DSFID        0x29
 			//#define ISO15693_CMD_LOCK_DSFID         0x2A
+				default:
+					ResponseByteCount = 0;
+                			break;
 
-              default:
-                ResponseByteCount = 0;
-                break;
+            		}// end switch
 
+           	} // end if mayExecute
 
-
-            }// end switch
-
-           } // end if mayExecute
-
-           if (ResponseByteCount > 0) {
+           	if (ResponseByteCount > 0) {
                 /* There is data to be sent. Append CRC */
-                ISO15693AppendCRC(FrameBuf, ResponseByteCount);
-                ResponseByteCount += ISO15693_CRC16_SIZE;
-            }
+                	ISO15693AppendCRC(FrameBuf, ResponseByteCount);
+                	ResponseByteCount += ISO15693_CRC16_SIZE;
+            	}
 
-            return ResponseByteCount;
+            	return ResponseByteCount;
 
         } else { // Invalid CRC
             return ISO15693_APP_NO_RESPONSE;
