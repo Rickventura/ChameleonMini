@@ -76,15 +76,15 @@ STEP 5:Define all the functions declared in STEP2
     {
     }
     
- STEP 6: In ISO15693_state_machine.h declare the dereferenced functions    
- =================================================
- Due to the fact that it was decided to include the state machine in every tags rather than being compiled and linked as an object file,
- any (*TagGetUid)() call in the state machine should be declared static in ISO15693_state_machine.h. Otherwise the compiler would 
- complain abut the same function being declared as many times as the number of tags in which it is included.
-     
- static void (*TagGetUid)(ConfigurationUidType Uid) ;
- static void (*TagSetUid)(ConfigurationUidType Uid) ;
- static uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
+STEP 6: In ISO15693_state_machine.h declare the dereferenced functions    
+=================================================
+Due to the fact that it was decided to include the state machine in every tags rather than being compiled and linked as an object file,
+any (*TagGetUid)() call in the state machine should be declared static in ISO15693_state_machine.h. Otherwise the compiler would 
+complain abut the same function being declared as many times as the number of tags in which it is included.
+
+	static void (*TagGetUid)(ConfigurationUidType Uid) ;
+	static void (*TagSetUid)(ConfigurationUidType Uid) ;
+	static uint16_t (*readsingle) (uint8_t *FrameBuf, struct ISO15693_parameters *request)
  
  STEP 7: In ISO15693_state_machine.h add the custom command to the command switch:
  =================================================
