@@ -61,28 +61,28 @@ uint16_t IS015693AppProcess(uint8_t* FrameBuf, uint16_t FrameBytes)
 	      switch ( request.cmd ) {
 
 	        case ISO15693_CMD_STAY_QUIET:         
-				ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
-				break;
+			ResponseByteCount = ISO15693_stay_quiet(&State , FrameBuf, &request);
+			break;
 
-			case ISO15693_CMD_SELECT:             
-				ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
-				break;
+		case ISO15693_CMD_SELECT:             
+			ResponseByteCount = ISO15693_select (&State , FrameBuf, &request);
+			break;
 
 	        case ISO15693_CMD_RESET_TO_READY:     
-				ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
-				break;
+			ResponseByteCount = ISO15693_reset_to_ready(&State , FrameBuf, &request); 
+			break;
 
-			case ISO15693_CMD_INVENTORY:  
-				ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
-				break;       
+		case ISO15693_CMD_INVENTORY:  
+			ResponseByteCount = ISO15693_inventory(FrameBuf , &request);         
+			break;       
 
    	       	case ISO15693_CMD_WRITE_SINGLE:       
-				ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
-				break;
+			ResponseByteCount = ISO15693_writesingle(FrameBuf, &request);         
+			break;
 
 
-			default:
-				ResponseByteCount = Tag_SWITCH_COMMANDS(FrameBuf,&request);
+		default:
+			ResponseByteCount = Tag_SWITCH_COMMANDS(FrameBuf,&request);
                 break;
 
             }// end switch
