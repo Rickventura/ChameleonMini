@@ -2,7 +2,7 @@ Chameleon-Mini rev G ISO15693 STATE MACHINE VERSION II(NO USE OF POINTERS TO FUN
 ===========================================
 This is a repository forked from ChameleonMini rev G, an attempt made to build a core ISO15693 state machine to be exploited by 
 any ISO 15693 compliant tag applications.
-For instance it is assumed that the state machine calls a wrapper function "TagGetUid2, defined in the tag source file, which wraps a specific tag function like  TITagitstandardGetUid as follows.
+For instance it is assumed that the state machine calls a wrapper function "TagGetUid, defined in the tag source file, which wraps a specific tag function like  TITagitstandardGetUid as follows.
 
 	void TagGetUid(ConfigurationUidType Uid)
 	{
