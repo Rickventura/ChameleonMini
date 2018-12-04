@@ -344,7 +344,7 @@ uint8_t ISO15693_status_check ( enum status *State , struct ISO15693_parameters 
 uint16_t IS015693_CMDNotSuported(uint8_t *FrameBuf)
 {
 	FrameBuf[0]=0x01;
-	FrameBuf[1]=0x01;		
+	FrameBuf[1]=0x01;
 	return 2;
 
 }
